@@ -19,7 +19,7 @@ A versatile, open‑source calculator for Android – combining a standard calcu
 
 ## Download
 
-Grab the latest APK from the [Releases](https://github.com/YOUR_USERNAME/UniCalculator/releases) page.
+Grab the latest APK from the [Releases](https://github.com/Jomet-Franklin/UniCalculator/releases/tag/v1.0.0) page.
 
 ## Build from Source
 
