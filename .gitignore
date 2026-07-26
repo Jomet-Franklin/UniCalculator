@@ -1,0 +1,47 @@
+# Android / Gradle
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Keystore files (sensitive)
+*.jks
+*.keystore
+
+# APK / AAB output
+*.apk
+*.aab
+
+# Android Studio / IntelliJ
+.idea/
+*.iws
+out/
+.vscode/
+
+# Compiled files
+*.class
+*.dex
+*.jar
+*.war
+*.ear
+
+# Log files
+*.log
+
+# OS junk
+Thumbs.dbbuild/
+.gradle/
+*.apk
+.idea/
+local.properties

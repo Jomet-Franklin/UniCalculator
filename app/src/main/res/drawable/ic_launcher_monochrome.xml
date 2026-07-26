@@ -1,0 +1,55 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+  <group android:scaleX="0.67833334"
+      android:scaleY="0.67833334"
+      android:translateX="82.346664"
+      android:translateY="82.346664">
+    <path
+        android:pathData="M118,0L394,0A118,118 0,0 1,512 118L512,394A118,118 0,0 1,394 512L118,512A118,118 0,0 1,0 394L0,118A118,118 0,0 1,118 0z">
+      <aapt:attr name="android:fillColor">
+        <gradient
+            android:startX="-0"
+            android:startY="0"
+            android:endX="512"
+            android:endY="512"
+            android:type="linear">
+          <item android:offset="0" android:color="#FF4C2FBF"/>
+          <item android:offset="1" android:color="#FF7C3AED"/>
+        </gradient>
+      </aapt:attr>
+    </path>
+    <path
+        android:pathData="M130,96L382,96A24,24 0,0 1,406 120L406,180A24,24 0,0 1,382 204L130,204A24,24 0,0 1,106 180L106,120A24,24 0,0 1,130 96z"
+        android:fillColor="#FFFFFF"/>
+    <path
+        android:pathData="M126,234L174,234A20,20 0,0 1,194 254L194,302A20,20 0,0 1,174 322L126,322A20,20 0,0 1,106 302L106,254A20,20 0,0 1,126 234z"
+        android:fillColor="#FFFFFF"/>
+    <path
+        android:pathData="M232,234L280,234A20,20 0,0 1,300 254L300,302A20,20 0,0 1,280 322L232,322A20,20 0,0 1,212 302L212,254A20,20 0,0 1,232 234z"
+        android:fillColor="#FFFFFF"/>
+    <path
+        android:pathData="M126,330L174,330A20,20 0,0 1,194 350L194,398A20,20 0,0 1,174 418L126,418A20,20 0,0 1,106 398L106,350A20,20 0,0 1,126 330z"
+        android:fillColor="#FFFFFF"/>
+    <path
+        android:pathData="M232,330L280,330A20,20 0,0 1,300 350L300,398A20,20 0,0 1,280 418L232,418A20,20 0,0 1,212 398L212,350A20,20 0,0 1,232 330z"
+        android:fillColor="#FFFFFF"/>
+    <path
+        android:pathData="M338,234L386,234A20,20 0,0 1,406 254L406,398A20,20 0,0 1,386 418L338,418A20,20 0,0 1,318 398L318,254A20,20 0,0 1,338 234z">
+      <aapt:attr name="android:fillColor">
+        <gradient
+            android:startX="318"
+            android:startY="234"
+            android:endX="406"
+            android:endY="418"
+            android:type="linear">
+          <item android:offset="0" android:color="#FFFFB74D"/>
+          <item android:offset="1" android:color="#FFFF7A59"/>
+        </gradient>
+      </aapt:attr>
+    </path>
+  </group>
+</vector>
