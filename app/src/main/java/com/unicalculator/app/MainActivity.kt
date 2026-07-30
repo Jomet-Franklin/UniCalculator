@@ -19,6 +19,7 @@ package com.unicalculator.app
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -27,6 +28,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -47,7 +49,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -97,11 +98,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.text.input.KeyboardType
 import com.jherkenhoff.libqalculate.AngleUnit
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.unicalculator.app.ui.theme.SettingsScreen
 import androidx.compose.ui.unit.DpOffset
+import androidx.core.content.edit
+import kotlin.time.Duration.Companion.milliseconds
 
 // ========== HELPER FUNCTIONS & DATA ==========
 @Composable
@@ -116,33 +122,33 @@ fun getModeIcon(mode: CalculatorMode, isDarkTheme: Boolean): Int {
 data class ConverterCategory(
     val id: String,
     val name: String,
-    val icon: String,
+    val iconRes: Int,
     val units: List<String>
 )
 
 val converterCategories = listOf(
-    ConverterCategory("length", "Length", "📏", listOf("Nanometer", "Micrometer", "Millimeter", "Centimeter", "Decimeter", "Meter", "Kilometer", "Mile", "Yard", "Foot", "Inch", "Nautical Mile")),
-    ConverterCategory("area", "Area", "📐", listOf("Square Millimeter", "Square Centimeter", "Square Decimeter", "Square Meter", "Square Kilometer", "Hectare", "Acre", "Square Yard", "Square Foot", "Square Inch")),
-    ConverterCategory("volume", "Volume", "🧊", listOf("Cubic Millimeter", "Cubic Centimeter", "Cubic Decimeter", "Cubic Meter", "Liter", "Milliliter", "Kiloliter", "Gallon", "Quart", "Pint", "Cup", "Fluid Ounce", "Tablespoon", "Teaspoon")),
-    ConverterCategory("mass", "Mass", "⚖️", listOf("Milligram", "Gram", "Kilogram", "Tonne", "Pound", "Ounce", "Stone")),
-    ConverterCategory("temperature", "Temperature", "🌡️", listOf("Celsius", "Fahrenheit", "Kelvin")),
-    ConverterCategory("storage", "Storage", "💾", listOf("Bit", "Byte", "Kilobit", "Kilobyte", "Kibibit", "Kibibyte", "Megabit", "Megabyte", "Mebibit", "Mebibyte", "Gigabit", "Gigabyte", "Gibibit", "Gibibyte", "Terabit", "Terabyte", "Tebibit", "Tebibyte", "Petabit", "Petabyte", "Pebibit", "Pebibyte")),
-    ConverterCategory("pressure", "Pressure", "💨", listOf("Pascal", "Kilopascal", "Megapascal", "Bar", "Millibar", "Atmosphere", "PSI", "mmHg")),
-    ConverterCategory("heat", "Heat/Energy", "🔥", listOf("Joule", "Kilojoule", "Megajoule", "Calorie", "Kilocalorie", "Watt-hour", "Kilowatt-hour")),
-    ConverterCategory("speed", "Speed", "🚀", listOf("Meter per second", "Kilometer per hour", "Kilometer per second", "Mile per hour", "Knot", "Mach", "Speed of light")),
-    ConverterCategory("time", "Time", "⏰", listOf("Millisecond", "Second", "Minute", "Hour", "Day", "Week", "Month", "Year")),
-    ConverterCategory("angle", "Angle", "📐", listOf("Degree", "Arcminute", "Arcsecond", "Radian", "Gradian", "Turn")),
-    ConverterCategory("power", "Power", "⚡", listOf("Watt", "Kilowatt", "Megawatt", "Horsepower", "Metric horsepower", "Kilocalorie per second", "Newton-meter per second", "Kilogram-meter per second", "BTU per second", "Foot-pound per second")),
-    ConverterCategory("force", "Force", "💪", listOf("Newton", "Kilonewton", "Dyne", "Pound-force", "Ounce-force")),
-    ConverterCategory("density", "Density", "📊", listOf("Kilogram per cubic meter", "Gram per cubic centimeter", "Pound per cubic foot", "Pound per gallon")),
-    ConverterCategory("frequency", "Frequency", "📶", listOf("Hertz", "Kilohertz", "Megahertz", "Gigahertz")),
-    ConverterCategory("torque", "Torque", "🔧", listOf("Newton meter", "Kilonewton meter", "Pound-foot", "Ounce-inch")),
-    ConverterCategory("viscosity", "Viscosity", "🧴", listOf("Pascal-second", "Centipoise", "Poise", "Poiseuille")),
-    ConverterCategory("fuel", "Fuel", "⛽", listOf("Liter", "Gallon (US)", "Gallon (UK)", "Barrel", "Cubic meter")),
-    ConverterCategory("date", "Date", "📅", listOf("Days", "Weeks", "Months", "Years")),
-    ConverterCategory("bmi", "BMI", "💪", listOf("kg/m²")),
-    ConverterCategory("shopping", "Shopping", "🛒", listOf("Percent", "Currency")),
-   )
+    ConverterCategory("length", "Length",R.drawable.ic_length, listOf("Nanometer", "Micrometer", "Millimeter", "Centimeter", "Decimeter", "Meter", "Kilometer", "Mile", "Yard", "Foot", "Inch", "Nautical Mile")),
+    ConverterCategory("area", "Area",R.drawable.ic_area, listOf("Square Millimeter", "Square Centimeter", "Square Decimeter", "Square Meter", "Square Kilometer", "Hectare", "Acre", "Square Yard", "Square Foot", "Square Inch")),
+    ConverterCategory("volume", "Volume",R.drawable.ic_volume, listOf("Cubic Millimeter", "Cubic Centimeter", "Cubic Decimeter", "Cubic Meter", "Liter", "Milliliter", "Kiloliter", "Gallon", "Quart", "Pint", "Cup", "Fluid Ounce", "Tablespoon", "Teaspoon")),
+    ConverterCategory("mass", "Mass",R.drawable.ic_mass, listOf("Milligram", "Gram", "Kilogram", "Tonne", "Pound", "Ounce", "Stone")),
+    ConverterCategory("temperature", "Temperature",R.drawable.ic_temperature, listOf("Celsius", "Fahrenheit", "Kelvin")),
+    ConverterCategory("storage", "Storage",R.drawable.ic_storage, listOf("Bit", "Byte", "Kilobit", "Kilobyte", "Kibibit", "Kibibyte", "Megabit", "Megabyte", "Mebibit", "Mebibyte", "Gigabit", "Gigabyte", "Gibibit", "Gibibyte", "Terabit", "Terabyte", "Tebibit", "Tebibyte", "Petabit", "Petabyte", "Pebibit", "Pebibyte")),
+    ConverterCategory("pressure", "Pressure",R.drawable.ic_pressure, listOf("Pascal", "Kilopascal", "Megapascal", "Bar", "Millibar", "Atmosphere", "PSI", "mmHg")),
+    ConverterCategory("heat", "Heat/Energy",R.drawable.ic_heat, listOf("Joule", "Kilojoule", "Megajoule", "Calorie", "Kilocalorie", "Watt-hour", "Kilowatt-hour")),
+    ConverterCategory("speed", "Speed",R.drawable.ic_speed, listOf("Meter per second", "Kilometer per hour", "Kilometer per second", "Mile per hour", "Knot", "Mach", "Speed of light")),
+    ConverterCategory("time", "Time",R.drawable.ic_time, listOf("Millisecond", "Second", "Minute", "Hour", "Day", "Week", "Month", "Year")),
+    ConverterCategory("angle", "Angle",R.drawable.ic_angle, listOf("Degree", "Arcminute", "Arcsecond", "Radian", "Gradian", "Turn")),
+    ConverterCategory("power", "Power",R.drawable.ic_power, listOf("Watt", "Kilowatt", "Megawatt", "Horsepower", "Metric horsepower", "Kilocalorie per second", "Newton-meter per second", "Kilogram-meter per second", "BTU per second", "Foot-pound per second")),
+    ConverterCategory("force", "Force",R.drawable.ic_force, listOf("Newton", "Kilonewton", "Dyne", "Pound-force", "Ounce-force")),
+    ConverterCategory("density", "Density",R.drawable.ic_density, listOf("Kilogram per cubic meter", "Gram per cubic centimeter", "Pound per cubic foot", "Pound per gallon")),
+    ConverterCategory("frequency", "Frequency",R.drawable.ic_frequency, listOf("Hertz", "Kilohertz", "Megahertz", "Gigahertz")),
+    ConverterCategory("torque", "Torque",R.drawable.ic_torque, listOf("Newton meter", "Kilonewton meter", "Pound-foot", "Ounce-inch")),
+    ConverterCategory("viscosity", "Viscosity",R.drawable.ic_viscosity, listOf("Pascal-second", "Centipoise", "Poise", "Poiseuille")),
+    ConverterCategory("fuel", "Fuel",R.drawable.ic_fuel, listOf("Liter", "Gallon (US)", "Gallon (UK)", "Barrel", "Cubic meter")),
+    ConverterCategory("date", "Date",R.drawable.ic_date, listOf("Days", "Weeks", "Months", "Years")),
+    ConverterCategory("bmi", "BMI",R.drawable.ic_bmi, listOf("kg/m²")),
+    ConverterCategory("shopping", "Shopping",R.drawable.ic_shopping, listOf("Percent", "Currency")),
+)
 
 enum class KeyStyle { NUMBER, FUNCTION, ACCENT, SCIENTIFIC }
 
@@ -271,7 +277,7 @@ private fun scientificHandleKeyPress(
                 text.substring(0, start - 1) + text.substring(start)
             }
             val newCursor = if (start != end) start else (start - 1).coerceAtLeast(0)
-            TextFieldValue(if (newText.isEmpty()) "0" else newText, TextRange(newCursor))
+            TextFieldValue(newText.ifEmpty { "0" }, TextRange(newCursor))
         }
         justEvaluated && label.length == 1 && label[0].isDigit() -> {
             TextFieldValue(label, TextRange(label.length))
@@ -295,9 +301,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         HistoryManager.init(this)
+
+        // Load saved theme from SharedPreferences
+        val prefs = getSharedPreferences("settings_prefs", MODE_PRIVATE)
+        val savedTheme = prefs.getString("selected_theme", "System") ?: "System"
+        val savedPureBlack = prefs.getBoolean("pure_black_enabled", false)
+
         setContent {
-            var selectedTheme by rememberSaveable { mutableStateOf("System") }
-            var isPureBlackEnabled by rememberSaveable { mutableStateOf(false) }
+            var selectedTheme by remember { mutableStateOf(savedTheme) }
+            var isPureBlackEnabled by remember { mutableStateOf(savedPureBlack) }
 
             val darkTheme = when (selectedTheme) {
                 "Dark" -> true
@@ -312,10 +324,14 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     UniCalculatorApp(
                         modifier = Modifier.padding(innerPadding),
-                        selectedTheme = selectedTheme,
-                        onThemeChanged = { theme -> selectedTheme = theme },
-                        isPureBlackEnabled = isPureBlackEnabled,
-                        onPureBlackChanged = { pureBlack -> isPureBlackEnabled = pureBlack }
+                        onThemeChanged = { theme ->
+                            selectedTheme = theme
+                            prefs.edit { putString("selected_theme", theme) }
+                        },
+                        onPureBlackChanged = { pureBlack ->
+                            isPureBlackEnabled = pureBlack
+                            prefs.edit { putBoolean("pure_black_enabled", pureBlack) }
+                        }
                     )
                 }
             }
@@ -326,18 +342,17 @@ class MainActivity : ComponentActivity() {
 // ========== APP NAVIGATION ==========
 enum class CalculatorMode { SCIENTIFIC, STANDARD, CONVERTER }
 
+@SuppressLint("AutoboxingStateCreation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UniCalculatorApp(
     modifier: Modifier = Modifier,
-    selectedTheme: String,
     onThemeChanged: (String) -> Unit,
-    isPureBlackEnabled: Boolean,
     onPureBlackChanged: (Boolean) -> Unit
 ) {
     val colors = LocalCalculatorColors.current
 
-    var currentIndex by remember { mutableStateOf(1) }
+    var currentIndex by remember { mutableIntStateOf(1) }
     val modes = listOf(CalculatorMode.SCIENTIFIC, CalculatorMode.STANDARD, CalculatorMode.CONVERTER)
 
     var showHistory by remember { mutableStateOf(false) }
@@ -353,7 +368,7 @@ fun UniCalculatorApp(
     var standardTextFieldValue by remember { mutableStateOf(TextFieldValue("0")) }
     var scientificTextFieldValue by remember { mutableStateOf(TextFieldValue("0")) }
 
-    var dragOffset by remember { mutableStateOf(0f) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
     val threshold = 150f
 
     Box(
@@ -424,7 +439,6 @@ fun UniCalculatorApp(
             currentMode == CalculatorMode.CONVERTER -> {
                 ConverterScreen(
                     onModeChange = { newMode -> currentIndex = modes.indexOf(newMode) },
-                    onBack = { currentIndex = 1 },
                     onCategoryClick = { category ->
                         selectedConverterCategory = category
                         showConverterDetail = true
@@ -452,6 +466,8 @@ fun UniCalculatorApp(
                     }
                 )
             }
+            else -> {
+            }
         }
 
         if (showHistory) {
@@ -463,7 +479,7 @@ fun UniCalculatorApp(
                 HistoryContent(
                     onDismiss = { showHistory = false },
                     currentMode = currentMode.name,
-                    onExpressionSelected = { expr, mode ->
+                    onExpressionSelected = { expr, _ ->
                         if (currentMode.name == "STANDARD") {
                             val currentValue = standardTextFieldValue
                             val currentText = currentValue.text
@@ -507,7 +523,6 @@ fun CalculatorTopBar(
             .background(colors.background)
             .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {
-        // Menu button (pill‑shaped, no shadow)
         Box(modifier = Modifier.align(Alignment.CenterStart)) {
             Box(
                 modifier = Modifier
@@ -539,7 +554,6 @@ fun CalculatorTopBar(
                         menuExpanded = false
                         onMenuItemClick("Settings")
                     },
-                    // ✅ Removed leadingIcon
                     modifier = Modifier
                         .background(Color.Transparent)
                         .padding(4.dp)
@@ -550,15 +564,12 @@ fun CalculatorTopBar(
                         menuExpanded = false
                         onMenuItemClick("About")
                     },
-                    // ✅ Removed leadingIcon
                     modifier = Modifier
                         .background(Color.Transparent)
                         .padding(4.dp)
                 )
             }
         }
-
-        // Mode icons (unchanged)
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -590,8 +601,6 @@ fun CalculatorTopBar(
                 }
             }
         }
-
-        // History button (unchanged)
         if (onHistoryClick != null) {
             Box(modifier = Modifier.align(Alignment.CenterEnd)) {
                 IconButton(onClick = onHistoryClick) {
@@ -662,6 +671,7 @@ fun StandardCalculatorScreen(
             )
         }
 
+        // Compact row (√, π, etc...)
         CompactFunctionRow(
             isExpanded = isFunctionExpanded,
             onToggle = onToggleFunction,
@@ -673,8 +683,8 @@ fun StandardCalculatorScreen(
                 keyboardController?.hide()
             }
         )
-
-        StandardKeypad(
+        StandardKeypadWithScientific(
+            isExpanded = isFunctionExpanded,
             onKeyPress = { label ->
                 if (label == "=") {
                     val result = solveEquation(expression)
@@ -682,13 +692,20 @@ fun StandardCalculatorScreen(
                     onTextFieldValueChange(newValue)
                     HistoryManager.addEntry(expression, result, "STANDARD")
                     justEvaluated = true
-                } else {
-                    val newValue = standardHandleButtonPress(textFieldValue, label, justEvaluated)
-                    onTextFieldValueChange(newValue)
-                    justEvaluated = false
+                    keyboardEnabled = false
+                    keyboardController?.hide()
+                    return@StandardKeypadWithScientific
                 }
+                val newValue = standardHandleButtonPress(textFieldValue, label, justEvaluated)
+                onTextFieldValueChange(newValue)
+                justEvaluated = false
                 keyboardEnabled = false
                 keyboardController?.hide()
+
+                val scientificFunctions = listOf("sin", "cos", "tan", "sin⁻¹", "cos⁻¹", "tan⁻¹", "log", "ln", "exp", "%", "|x|")
+                if (scientificFunctions.contains(label) && isFunctionExpanded) {
+                    onToggleFunction()
+                }
             }
         )
     }
@@ -714,7 +731,7 @@ private fun standardHandleButtonPress(current: TextFieldValue, label: String, ju
                 text.substring(0, start - 1) + text.substring(start)
             }
             val newCursor = if (start != end) start else (start - 1).coerceAtLeast(0)
-            TextFieldValue(if (newText.isEmpty()) "0" else newText, TextRange(newCursor))
+            TextFieldValue(newText.ifEmpty { "0" }, TextRange(newCursor))
         }
         justEvaluated && label.length == 1 && label[0].isDigit() -> {
             TextFieldValue(label, TextRange(label.length))
@@ -726,7 +743,11 @@ private fun standardHandleButtonPress(current: TextFieldValue, label: String, ju
             } else {
                 text.substring(0, start) + transformed + text.substring(end)
             }
-            val newCursor = if (text == "0") transformed.length else start + transformed.length
+            val newCursor = if (text == "0") {
+                transformed.length
+            } else {
+                start + transformed.length
+            }
             TextFieldValue(newText, TextRange(newCursor))
         }
     }
@@ -737,14 +758,10 @@ private fun standardHandleButtonPress(current: TextFieldValue, label: String, ju
 fun CompactFunctionRow(
     isExpanded: Boolean,
     onToggle: () -> Unit,
-    onFunctionClick: (String) -> Unit
+    onFunctionClick: (String) -> Unit,
 ) {
     val colors = LocalCalculatorColors.current
     val isDarkTheme = isSystemInDarkTheme()
-    val gridFunctions = listOf(
-        "sin", "cos", "tan", "log", "ln",
-        "sin⁻¹", "cos⁻¹", "tan⁻¹", "exp"
-    )
     val toggleIconRes = when {
         isExpanded && isDarkTheme -> R.drawable.ic_flask_up_dark
         isExpanded && !isDarkTheme -> R.drawable.ic_flask_up_light
@@ -795,105 +812,130 @@ fun CompactFunctionRow(
                     .clickable { onToggle() }
             )
         }
-
-        if (isExpanded) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(5),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(105.dp)
-                    .padding(vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                items(gridFunctions) { func ->
-                    Button(
-                        onClick = { onFunctionClick(func) },
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.functionButton,
-                            contentColor = colors.textPrimary
-                        ),
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .padding(2.dp),
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Text(
-                            text = func,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(4.dp)
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 
-// ========== STANDARD KEYPAD ==========
 @Composable
-fun StandardKeypad(onKeyPress: (String) -> Unit, modifier: Modifier = Modifier) {
+fun StandardKeypadWithScientific(
+    isExpanded: Boolean,
+    onKeyPress: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val colors = LocalCalculatorColors.current
 
-    val rows = listOf(
+    // Row 1: fixed
+    val row1 = listOf(
+        KeyDef("AC", KeyStyle.FUNCTION),
+        KeyDef("(", KeyStyle.FUNCTION),
+        KeyDef(")", KeyStyle.FUNCTION),
+        KeyDef("÷", KeyStyle.FUNCTION)
+    )
+
+    // Row 2: digits OR scientific functions
+    val row2 = if (isExpanded) {
         listOf(
-            KeyDef("AC", KeyStyle.FUNCTION),
-            KeyDef("(", KeyStyle.FUNCTION),
-            KeyDef(")", KeyStyle.FUNCTION),
-            KeyDef("÷", KeyStyle.FUNCTION)
-        ),
+            KeyDef("sin", KeyStyle.SCIENTIFIC),
+            KeyDef("cos", KeyStyle.SCIENTIFIC),
+            KeyDef("tan", KeyStyle.SCIENTIFIC),
+            KeyDef("×", KeyStyle.FUNCTION)
+        )
+    } else {
         listOf(
             KeyDef("7", KeyStyle.NUMBER),
             KeyDef("8", KeyStyle.NUMBER),
             KeyDef("9", KeyStyle.NUMBER),
             KeyDef("×", KeyStyle.FUNCTION)
-        ),
+        )
+    }
+
+    // Row 3: digits OR inverse trig
+    val row3 = if (isExpanded) {
+        listOf(
+            KeyDef("sin⁻¹", KeyStyle.SCIENTIFIC),
+            KeyDef("cos⁻¹", KeyStyle.SCIENTIFIC),
+            KeyDef("tan⁻¹", KeyStyle.SCIENTIFIC),
+            KeyDef("−", KeyStyle.FUNCTION)
+        )
+    } else {
         listOf(
             KeyDef("4", KeyStyle.NUMBER),
             KeyDef("5", KeyStyle.NUMBER),
             KeyDef("6", KeyStyle.NUMBER),
             KeyDef("−", KeyStyle.FUNCTION)
-        ),
+        )
+    }
+
+    // Row 4: digits OR log/ln/exp
+    val row4 = if (isExpanded) {
+        listOf(
+            KeyDef("log", KeyStyle.SCIENTIFIC),
+            KeyDef("ln", KeyStyle.SCIENTIFIC),
+            KeyDef("exp", KeyStyle.SCIENTIFIC),
+            KeyDef("+", KeyStyle.FUNCTION)
+        )
+    } else {
         listOf(
             KeyDef("1", KeyStyle.NUMBER),
             KeyDef("2", KeyStyle.NUMBER),
             KeyDef("3", KeyStyle.NUMBER),
             KeyDef("+", KeyStyle.FUNCTION)
-        ),
+        )
+    }
+
+    // Row 5: digits/operators OR scientific functions when expanded
+    val row5 = if (isExpanded) {
+        listOf(
+            KeyDef("%", KeyStyle.SCIENTIFIC),
+            KeyDef("|x|", KeyStyle.SCIENTIFIC),
+            KeyDef("⌫", KeyStyle.ACCENT),
+            KeyDef("=", KeyStyle.ACCENT)
+        )
+    } else {
         listOf(
             KeyDef("0", KeyStyle.NUMBER),
             KeyDef(".", KeyStyle.NUMBER),
             KeyDef("⌫", KeyStyle.ACCENT),
             KeyDef("=", KeyStyle.ACCENT)
         )
-    )
+    }
+
+    val rows = listOf(row1, row2, row3, row4, row5)
 
     Column(modifier = modifier.fillMaxWidth().background(colors.background).padding(8.dp)) {
         rows.forEach { row ->
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { key ->
+                    // Background: scientific keys use numberButton color
                     val bg = when (key.style) {
                         KeyStyle.NUMBER -> colors.numberButton
+                        KeyStyle.SCIENTIFIC -> colors.numberButton
                         KeyStyle.FUNCTION -> colors.functionButton
                         KeyStyle.ACCENT -> colors.accentButton
-                        else -> colors.numberButton
                     }
-                    val fontSize = when (key.label) {
-                        "AC" -> 18.sp
-                        "=" -> 28.sp
+
+                    // Font size: smaller for scientific, adjust for AC and =
+                    val fontSize = when {
+                        key.label.length > 3 && key.style == KeyStyle.SCIENTIFIC -> 13.sp  // sin⁻¹ etc.
+                        key.style == KeyStyle.SCIENTIFIC -> 15.sp                         // sin, cos, log
+                        key.label == "AC" -> 18.sp
+                        key.label == "=" -> 28.sp
                         else -> 24.sp
                     }
+
                     Button(
                         onClick = { onKeyPress(key.label) },
                         shape = RoundedCornerShape(20.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = bg, contentColor = colors.textPrimary),
                         modifier = Modifier.weight(1f).aspectRatio(1f).padding(4.dp)
                     ) {
-                        Text(key.label, fontSize = fontSize, fontWeight = if (key.style == KeyStyle.ACCENT) FontWeight.Bold else FontWeight.Normal)
+                        Text(
+                            key.label,
+                            fontSize = fontSize,
+                            fontWeight = if (key.style == KeyStyle.ACCENT) FontWeight.Bold else FontWeight.Normal,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Clip
+                        )
                     }
                 }
             }
@@ -924,7 +966,7 @@ fun EditableDisplay(
 
     LaunchedEffect(textFieldValue.text.length) {
         coroutineScope.launch {
-            delay(50)
+            delay(50.milliseconds)
             scrollState.animateScrollTo(scrollState.maxValue)
         }
     }
@@ -933,7 +975,7 @@ fun EditableDisplay(
         if (hasFocus && !keyboardEnabled) {
             while (isActive) {
                 keyboardController?.hide()
-                delay(50)
+                delay(50.milliseconds)
             }
         }
     }
@@ -990,9 +1032,9 @@ fun EditableDisplay(
                 ) {
                     Text(
                         text = preview,
-                        color = colors.textSecondary,
+                        color = colors.accentText,
                         fontSize = previewFontSize.sp,
-                        fontWeight = FontWeight.Normal,
+                        fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1108,7 +1150,7 @@ private fun solveEquation(expression: String): String {
             }
         }
         return StandardCalculatorEngine.evaluateExpression(expression)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         return StandardCalculatorEngine.evaluateExpression(expression)
     }
 }
@@ -1143,10 +1185,10 @@ fun HistoryContent(
     var historyItems by remember { mutableStateOf<List<HistoryItem>>(emptyList()) }
 
     fun refreshHistory() {
-        try {
-            historyItems = HistoryManager.getHistory()
-        } catch (e: Exception) {
-            historyItems = emptyList()
+        historyItems = try {
+            HistoryManager.getHistory()
+        } catch (_: Exception) {
+            emptyList()
         }
     }
 
@@ -1304,7 +1346,10 @@ fun HistoryItemCard(
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onExpressionTap(item.expression) }
+                        .combinedClickable(
+                            onClick = { onExpressionTap(item.expression) },
+                            onLongClick = { onLongPressExpression(item.expression) }
+                        )
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
@@ -1314,7 +1359,10 @@ fun HistoryItemCard(
                     fontWeight = FontWeight.Normal,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onResultTap(item.result) }
+                        .combinedClickable(
+                            onClick = { onResultTap(item.result) },
+                            onLongClick = { onLongPressResult(item.result) }
+                        )
                 )
             }
             IconButton(
@@ -1349,9 +1397,11 @@ fun HistoryItemCard(
 }
 
 // ========== BMI SCREEN ==========
+@SuppressLint("DefaultLocale")
 @Composable
 fun BMIScreen(onBack: () -> Unit) {
     val colors = LocalCalculatorColors.current
+    BackHandler(onBack = onBack)
     var height by remember { mutableStateOf("") }
     var weight by remember { mutableStateOf("") }
     var bmiResult by remember { mutableStateOf<Double?>(null) }
@@ -1359,10 +1409,10 @@ fun BMIScreen(onBack: () -> Unit) {
     fun calculateBMI() {
         val h = height.toDoubleOrNull()?.div(100) // cm to meters
         val w = weight.toDoubleOrNull()
-        if (h != null && w != null && h > 0) {
-            bmiResult = w / (h * h)
+        bmiResult = if (h != null && w != null && h > 0) {
+            w / (h * h)
         } else {
-            bmiResult = null
+            null
         }
     }
 
@@ -1510,7 +1560,8 @@ fun BMIScreen(onBack: () -> Unit) {
 @Composable
 fun ShoppingScreen(onBack: () -> Unit) {
     val colors = LocalCalculatorColors.current
-    var selectedTab by remember { mutableStateOf(0) }
+    BackHandler(onBack = onBack)
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     Column(
         modifier = Modifier
@@ -1558,11 +1609,14 @@ fun ShoppingScreen(onBack: () -> Unit) {
 @Composable
 fun DiscountTab() {
     val colors = LocalCalculatorColors.current
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
     var originalPrice by remember { mutableStateOf("") }
     var discountPercent by remember { mutableStateOf("") }
     var discountedPrice by remember { mutableStateOf("") }
     var savedAmount by remember { mutableStateOf("") }
 
+    @SuppressLint("DefaultLocale")
     fun calculate() {
         val orig = originalPrice.toDoubleOrNull()
         val disc = discountPercent.toDoubleOrNull()
@@ -1603,7 +1657,15 @@ fun DiscountTab() {
         }
     }
 
-    LaunchedEffect(originalPrice, discountPercent, discountedPrice, savedAmount) { calculate() }
+    LaunchedEffect(Unit) {
+        delay(100.milliseconds)
+        focusRequester.requestFocus()
+        keyboardController?.show()
+    }
+
+    LaunchedEffect(originalPrice, discountPercent, discountedPrice, savedAmount) {
+        calculate()
+    }
 
     Column {
         OutlinedTextField(
@@ -1616,9 +1678,17 @@ fun DiscountTab() {
                 unfocusedBorderColor = colors.textSecondary,
                 focusedLabelColor = colors.accentButton
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester)
+                .clickable {
+                    focusRequester.requestFocus()
+                    keyboardController?.show()
+                },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(Modifier.height(12.dp))
+
         OutlinedTextField(
             value = discountPercent,
             onValueChange = { discountPercent = it.filter { it.isDigit() || it == '.' } },
@@ -1629,9 +1699,11 @@ fun DiscountTab() {
                 unfocusedBorderColor = colors.textSecondary,
                 focusedLabelColor = colors.accentButton
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(Modifier.height(12.dp))
+
         OutlinedTextField(
             value = discountedPrice,
             onValueChange = { discountedPrice = it.filter { it.isDigit() || it == '.' } },
@@ -1642,9 +1714,11 @@ fun DiscountTab() {
                 unfocusedBorderColor = colors.textSecondary,
                 focusedLabelColor = colors.accentButton
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(Modifier.height(12.dp))
+
         OutlinedTextField(
             value = savedAmount,
             onValueChange = { savedAmount = it.filter { it.isDigit() || it == '.' } },
@@ -1655,18 +1729,21 @@ fun DiscountTab() {
                 unfocusedBorderColor = colors.textSecondary,
                 focusedLabelColor = colors.accentButton
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
     }
 }
-
 @Composable
 fun UnitPriceTab() {
     val colors = LocalCalculatorColors.current
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
     var totalAmount by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("") }
     var unitPrice by remember { mutableStateOf("") }
 
+    @SuppressLint("DefaultLocale")
     fun calculate() {
         val total = totalAmount.toDoubleOrNull()
         val qty = quantity.toDoubleOrNull()
@@ -1687,7 +1764,15 @@ fun UnitPriceTab() {
         }
     }
 
-    LaunchedEffect(totalAmount, quantity, unitPrice) { calculate() }
+    LaunchedEffect(Unit) {
+        delay(100.milliseconds)
+        focusRequester.requestFocus()
+        keyboardController?.show()
+    }
+
+    LaunchedEffect(totalAmount, quantity, unitPrice) {
+        calculate()
+    }
 
     Column {
         OutlinedTextField(
@@ -1700,9 +1785,17 @@ fun UnitPriceTab() {
                 unfocusedBorderColor = colors.textSecondary,
                 focusedLabelColor = colors.accentButton
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester)
+                .clickable {
+                    focusRequester.requestFocus()
+                    keyboardController?.show()
+                },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(Modifier.height(12.dp))
+
         OutlinedTextField(
             value = quantity,
             onValueChange = { quantity = it.filter { it.isDigit() || it == '.' } },
@@ -1713,9 +1806,11 @@ fun UnitPriceTab() {
                 unfocusedBorderColor = colors.textSecondary,
                 focusedLabelColor = colors.accentButton
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(Modifier.height(12.dp))
+
         OutlinedTextField(
             value = unitPrice,
             onValueChange = { unitPrice = it.filter { it.isDigit() || it == '.' } },
@@ -1726,7 +1821,8 @@ fun UnitPriceTab() {
                 unfocusedBorderColor = colors.textSecondary,
                 focusedLabelColor = colors.accentButton
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
     }
 }
@@ -1735,7 +1831,6 @@ fun UnitPriceTab() {
 @Composable
 fun ConverterScreen(
     onModeChange: (CalculatorMode) -> Unit,
-    onBack: () -> Unit,
     onCategoryClick: (String) -> Unit,
     onMenuItemClick: (String) -> Unit
 ) {
@@ -1773,14 +1868,19 @@ fun ConverterCard(category: ConverterCategory, onClick: () -> Unit) {
             .padding(4.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = colors.functionButton)
+        colors = CardDefaults.cardColors(containerColor = colors.converterButton)
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = category.icon, fontSize = 30.sp)
+            Icon(
+                painter = painterResource(id = category.iconRes),
+                contentDescription = category.name,
+                modifier = Modifier.size(36.dp),
+                tint = colors.converterIconTint
+            )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = category.name,
@@ -1832,7 +1932,7 @@ fun ScientificTopBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = colors.textPrimary, modifier = Modifier.size(20.dp))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colors.textPrimary, modifier = Modifier.size(20.dp))
             }
             SettingsButton(
                 label = angleMode,
@@ -1946,7 +2046,7 @@ fun ExternalKeyboardRow(
             modifier = Modifier.size(48.dp)
         ) {
             Icon(
-                Icons.Default.Undo,
+                Icons.AutoMirrored.Filled.Undo,
                 contentDescription = "Undo",
                 tint = if (canUndo) colors.textSecondary else colors.textSecondary.copy(alpha = 0.3f),
                 modifier = Modifier.size(24.dp)
@@ -1959,7 +2059,7 @@ fun ExternalKeyboardRow(
             modifier = Modifier.size(48.dp)
         ) {
             Icon(
-                Icons.Default.Redo,
+                Icons.AutoMirrored.Filled.Redo,
                 contentDescription = "Redo",
                 tint = if (canRedo) colors.textSecondary else colors.textSecondary.copy(alpha = 0.3f),
                 modifier = Modifier.size(24.dp)
@@ -2185,7 +2285,11 @@ fun ScientificCalculatorScreen(
                 }
             }
 
-            Divider(color = dividerColor, thickness = 1.dp, modifier = Modifier.padding(horizontal = 4.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 4.dp),
+                thickness = 1.dp,
+                color = dividerColor
+            )
 
             Box(
                 modifier = Modifier
@@ -2226,7 +2330,11 @@ fun ScientificCalculatorScreen(
                 }
             }
 
-            Divider(color = dividerColor, thickness = 1.dp, modifier = Modifier.padding(horizontal = 4.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 4.dp),
+                thickness = 1.dp,
+                color = dividerColor
+            )
 
             Box(
                 modifier = Modifier
@@ -2379,10 +2487,10 @@ fun ScientificKeypadFull(
                             currentLabel = keyDef.label,
                             items = keyDef.dropdownItems ?: emptyList(),
                             onItemSelected = { newLabel ->
-                                when {
-                                    keyDef.label == selectedPrefix -> onPrefixSelected(newLabel)
-                                    keyDef.label == selectedUnit -> onUnitSelected(newLabel)
-                                    keyDef.label == selectedComplex -> onComplexSelected(newLabel)
+                                when (keyDef.label) {
+                                    selectedPrefix -> onPrefixSelected(newLabel)
+                                    selectedUnit -> onUnitSelected(newLabel)
+                                    selectedComplex -> onComplexSelected(newLabel)
                                 }
                             },
                             onTap = { onKeyPress(keyDef.label) },
@@ -2443,7 +2551,7 @@ fun DualFunctionButton(
         keyDef.secondaryLabel?.let {
             Text(
                 text = it,
-                color = colors.textSecondary,
+                color = colors.textTertiary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -2553,7 +2661,6 @@ fun DropdownKeyButton(
 @Preview(showBackground = true)
 @Composable
 fun CalculatorPreview() {
-    var selectedTheme by remember { mutableStateOf("System") }
     var isPureBlackEnabled by remember { mutableStateOf(false) }
     val darkTheme = isSystemInDarkTheme()
     UniCalculatorTheme(
@@ -2562,9 +2669,7 @@ fun CalculatorPreview() {
     ) {
         UniCalculatorApp(
             modifier = Modifier,
-            selectedTheme = selectedTheme,
             onThemeChanged = {},
-            isPureBlackEnabled = isPureBlackEnabled,
             onPureBlackChanged = {}
         )
     }

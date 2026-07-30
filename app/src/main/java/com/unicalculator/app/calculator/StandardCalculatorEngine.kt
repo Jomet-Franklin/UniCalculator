@@ -20,10 +20,9 @@ package com.unicalculator.app.calculator
  */
 
 import kotlin.math.*
+import java.util.Locale
 
 object StandardCalculatorEngine {
-
-    // ====== PUBLIC API ======
 
     fun evaluateExpression(expr: String): String {
         return try {
@@ -49,51 +48,42 @@ object StandardCalculatorEngine {
             ""
         }
     }
-
     fun handleKeyPress(current: String, label: String): String {
         return when (label) {
             "AC" -> "0"
             "⌫" -> if (current.length > 1) current.dropLast(1) else "0"
-            "π" -> if (current == "0") "π" else current + "π"
-            "e" -> if (current == "0") "e" else current + "e"
-            "∞" -> if (current == "0") "∞" else current + "∞"
-            "√" -> if (current == "0") "√(" else current + "√("
+            "π" -> if (current == "0") "π" else "${current}π"
+            "e" -> if (current == "0") "e" else "${current}e"
+            "√" -> if (current == "0") "√(" else "${current}√("
             "sin", "cos", "tan", "ln", "log", "exp" -> {
-                if (current == "0") "$label(" else current + "$label("
+                if (current == "0") "$label(" else "$current$label("
             }
-            "sin⁻¹" -> if (current == "0") "asin(" else current + "asin("
-            "cos⁻¹" -> if (current == "0") "acos(" else current + "acos("
-            "tan⁻¹" -> if (current == "0") "atan(" else current + "atan("
+            "sin⁻¹" -> if (current == "0") "asin(" else "${current}asin("
+            "cos⁻¹" -> if (current == "0") "acos(" else "${current}acos("
+            "tan⁻¹" -> if (current == "0") "atan(" else "${current}atan("
 
-            "xⁿ" -> current + "^"
-            "!" -> current + "!"
-            "%" -> current + "%"
+            "xⁿ" -> "${current}^"
+            "!" -> "${current}!"
+            "%" -> "${current}%"
             "±" -> if (current.startsWith('-')) current.drop(1) else "-$current"
+            "|x|" -> "abs("
 
-            "(" -> current + "("
-            ")" -> current + ")"
-            "[" -> current + "["
-            "]" -> current + "]"
-            "_" -> current + "_"
-            ";" -> current + ";"
-            "=" -> current + "="
-            "," -> current + ","
-            "E" -> current + "E"
-
-            "·" -> current + "*"
-            "/" -> current + "/"
-            "+" -> current + "+"
-            "-" -> current + "-"
-            "." -> if (current == "0") "0." else current + "."
+            "(" -> "$current("
+            ")" -> "$current)"
+            "×" -> "$current×"
+            "÷" -> "$current÷"
+            "·" -> "$current*"
+            "/" -> "$current/"
+            "+" -> "$current+"
+            "-" -> "$current-"
+            "." -> if (current == "0") "0." else "$current."
 
             else -> {
                 if (current == "0" && label.firstOrNull()?.isDigit() == true) label
-                else current + label
+                else "$current$label"
             }
         }
     }
-
-    // ====== PRIVATE PARSER ======
 
     private fun sanitize(expr: String): String {
         var sanitized = expr
@@ -109,9 +99,6 @@ object StandardCalculatorEngine {
             .replace("sin⁻¹", "asin")
             .replace("cos⁻¹", "acos")
             .replace("tan⁻¹", "atan")
-        // "log" is handled by tokenizer – do NOT replace it here
-        // "e" is handled by tokenizer – do NOT replace it here
-        // "^" is kept as operator – do NOT replace it here
 
         sanitized = sanitized.replace(Regex("(\\d)([a-zA-Z])"), "$1*$2")
         sanitized = sanitized.replace(Regex("(\\d)(\\()"), "$1*$(")
@@ -162,7 +149,7 @@ object StandardCalculatorEngine {
                     }
                     val func = when (name) {
                         "sin", "cos", "tan", "asin", "acos", "atan",
-                        "ln", "log", "log10", "sqrt", "exp" -> {
+                        "ln", "log", "log10", "sqrt", "exp", "abs" -> {
                             Token.Function(name)
                         }
                         else -> null
@@ -174,7 +161,8 @@ object StandardCalculatorEngine {
                 }
                 ch == '(' -> { tokens.add(Token.LParen); i++ }
                 ch == ')' -> { tokens.add(Token.RParen); i++ }
-                ch in "+-*/%" -> { tokens.add(Token.Op(ch)); i++ }
+                ch in "+-*/" -> { tokens.add(Token.Op(ch)); i++ }
+                ch == '%' -> { tokens.add(Token.PostfixOp('%')); i++ }
                 ch == '^' -> { tokens.add(Token.Op('^')); i++ }
                 ch == '!' -> { tokens.add(Token.PostfixOp('!')); i++ }
                 ch == ' ' -> i++
@@ -225,7 +213,6 @@ object StandardCalculatorEngine {
                         when (token.char) {
                             '*' -> { pos++; left *= parseUnary() }
                             '/' -> { pos++; left /= parseUnary() }
-                            '%' -> { pos++; left %= parseUnary() }
                             else -> break
                         }
                     }
@@ -247,7 +234,7 @@ object StandardCalculatorEngine {
         }
 
         private fun parsePow(): Double {
-            var left = parsePrimary()
+            val left = parsePrimary()
             if (pos < tokens.size) {
                 val token = tokens[pos]
                 if (token is Token.Op && token.char == '^') {
@@ -261,8 +248,7 @@ object StandardCalculatorEngine {
 
         private fun parsePrimary(): Double {
             if (pos >= tokens.size) return 0.0
-            val token = tokens[pos]
-            return when (token) {
+            return when (val token = tokens[pos]) {
                 is Token.Number -> { pos++; applyPostfix(token.value) }
                 is Token.LParen -> {
                     pos++
@@ -292,9 +278,15 @@ object StandardCalculatorEngine {
         private fun applyPostfix(value: Double): Double {
             if (pos < tokens.size && tokens[pos] is Token.PostfixOp) {
                 val op = tokens[pos] as Token.PostfixOp
-                if (op.char == '!') {
-                    pos++
-                    return factorial(value.toInt()).toDouble()
+                when (op.char) {
+                    '!' -> {
+                        pos++
+                        return factorial(value.toInt()).toDouble()
+                    }
+                    '%' -> {
+                        pos++
+                        return value / 100.0
+                    }
                 }
             }
             return value
@@ -313,6 +305,7 @@ object StandardCalculatorEngine {
                 "log10" -> log10(arg)
                 "sqrt" -> sqrt(arg)
                 "exp" -> exp(arg)
+                "abs" -> abs(arg)
                 else -> 0.0
             }
         }
@@ -323,7 +316,7 @@ object StandardCalculatorEngine {
             value.toLong().toString()
         } else {
             val str = value.toString()
-            if (str.length > 15) String.format("%.10f", value).trimEnd('0').trimEnd('.')
+            if (str.length > 15) String.format(Locale.US, "%.10f", value).trimEnd('0').trimEnd('.')
             else str
         }
     }

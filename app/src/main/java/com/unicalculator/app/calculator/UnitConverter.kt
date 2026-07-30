@@ -246,16 +246,8 @@ object UnitConverter {
             "Years" to 365.2425
         )
 
-        // ==== NUMERIC BASE ====
-        categories["numericbase"] = listOf(
-            "Decimal" to 10.0,
-            "Binary" to 2.0,
-            "Octal" to 8.0,
-            "Hexadecimal" to 16.0
-        )
     }
 
-    // ==== Public API ====
     fun getUnitsForCategory(category: String): List<String> {
         return categories[category]?.map { it.first } ?: emptyList()
     }
@@ -263,9 +255,6 @@ object UnitConverter {
     fun convert(value: Double, fromUnit: String, toUnit: String, category: String? = null): Double? {
         if (category == "temperature") {
             return convertTemperature(value, fromUnit, toUnit)
-        }
-        if (category == "numericbase") {
-           return null
         }
 
         val cat = category ?: findCategoryForUnit(fromUnit) ?: return null
@@ -275,26 +264,6 @@ object UnitConverter {
         val toFactor = units.find { it.first == toUnit }?.second ?: return null
 
         return (value * fromFactor) / toFactor
-    }
-
-    // ==== Numeric Base Conversion ====
-    fun convertNumericBase(value: String, fromBase: Int, toBase: Int): String {
-        return try {
-            val decimal = value.toIntOrNull(fromBase) ?: return "Error"
-            decimal.toString(toBase).uppercase()
-        } catch (_: Exception) {
-            "Error"
-        }
-    }
-
-    fun getBaseForUnit(unit: String): Int {
-        return when (unit) {
-            "Binary" -> 2
-            "Octal" -> 8
-            "Decimal" -> 10
-            "Hexadecimal" -> 16
-            else -> 10
-        }
     }
 
     // ==== Temperature Conversion ====

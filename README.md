@@ -1,42 +1,44 @@
+![Banner](screenshots/banner.png)
+
 # UniCalculator
 
-A versatile, open‑source calculator for Android – combining a standard calculator, a scientific engine (powered by Qalculate!), and a unit converter with 20+ categories, BMI, and shopping tools.
+**A modern, open‑source calculator for Android – standard, scientific, and unit conversion, all in one.**
 
-## Features
+[![GitHub license](https://img.shields.io/github/license/Jomet-Franklin/UniCalculator)](https://github.com/Jomet-Franklin/UniCalculator/blob/main/LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/Jomet-Franklin/UniCalculator)](https://github.com/Jomet-Franklin/UniCalculator/releases)
+[![Android](https://img.shields.io/badge/Android-26%2B-brightgreen)](https://developer.android.com/)
 
-- **Standard** – basic arithmetic, parentheses, trig, log, exponentiation, factorial.
-- **Scientific** – advanced math (complex numbers, integrals, sums, derivatives) with Qalculate! engine, multiple angle units, and flexible display formats.
-- **Converter** – length, mass, volume, temperature, storage, pressure, speed, time, angle, power, force, density, frequency, torque, viscosity, fuel, date, plus BMI and shopping discount/unit price calculators.
-- **History** – stores calculations; copy, share, or reuse results.
+---
+
+## ✨ Features
+
+- **Standard Calculator** – basic arithmetic, parentheses, trigonometric functions, logarithms, exponentiation, factorial, and percentage.
+- **Scientific Calculator** – powered by the [Qalculate!](https://qalculate.github.io/) engine – complex numbers, integrals, sums, derivatives, multiple angle units, and flexible display formats.
+- **Unit Converter** – 20+ categories (length, mass, volume, temperature, storage, pressure, speed, time, angle, power, force, density, frequency, torque, viscosity, fuel, date) plus **BMI** and **Shopping** calculators.
+- **History** – stores your calculations; copy, share, or re‑use any result.
 - **Themes** – Light, Dark, and Pure Black (AMOLED) modes.
-- **Offline** – no data collection, no internet required.
+- **100% Offline** – no data collection, no internet required.
 
-## Screenshots
+---
 
-![Standard](screenshots/standard.png)
-![Scientific](screenshots/scientific.png)
-![Converter](screenshots/converter.png)
+## 📸 Screenshots
 
-## Download
+|                     Standard                     | Scientific | Converter |
+|:------------------------------------------------:|:---:|:---:|
+| <img src="screenshots/standard.png" width="250"> | <img src="screenshots/scientific.png" width="250"> | <img src="screenshots/converter.png" width="250"> |
 
-Grab the latest APK from the [Releases](https://github.com/Jomet-Franklin/UniCalculator/releases/tag/v1.0.0) page.
+---
 
-## Build from Source
+## 📥 Download
 
-1. Clone the repo.
-2. Open in Android Studio.
-3. Build and run.
+Get the latest APK from the [Releases](https://github.com/Jomet-Franklin/UniCalculator/releases) page.
 
-## License
+---
 
-GPL‑2.0 – see [LICENSE](LICENSE).
+## 🛠️ Build from Source
 
-## Acknowledgements
+1. Clone the repository:
 
-- [Qalculate!](https://qalculate.github.io/) – the powerful calculation engine
-- [qalculate-android](https://github.com/jherkenhoff/qalculate-android) – Android port
-- All other open‑source libraries listed in the About screen.
 
-## Contributing
-
-Issues and pull requests are welcome.
+   ```bash
+   git clone https://github.com/Jomet-Franklin/UniCalculator.git

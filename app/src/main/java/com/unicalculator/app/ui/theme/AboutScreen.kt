@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.unicalculator.app.ui.theme
 
 /*
@@ -20,7 +22,6 @@ package com.unicalculator.app.ui.theme
  */
 
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -43,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 
 private data class LinkRange(val start: Int, val end: Int, val url: String)
 
@@ -69,7 +71,6 @@ fun AboutScreen(
     var dialogTitle by remember { mutableStateOf("") }
     var dialogMessage by remember { mutableStateOf("") }
 
-    // ---------- Privacy text ----------
     val privacyText = """
         UniCalculator does not collect, store, or transmit any personal data.
         No analytics, no tracking, no advertisements.
@@ -81,7 +82,6 @@ fun AboutScreen(
         Last updated: July 2026
     """.trimIndent()
 
-    // ---------- Credits text with links ----------
     val creditsPlainText = """
         This app is built with the help of many amazing open‑source projects:
 
@@ -134,7 +134,7 @@ fun AboutScreen(
             subtitle = "Show your support on GitHub",
             onClick = {
                 val url = "https://github.com/Jomet-Franklin/UniCalculator"
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
             }
         ),
         RowItem(
@@ -143,7 +143,7 @@ fun AboutScreen(
             subtitle = "Support this app with a PayPal donation",
             onClick = {
                 val url = "https://www.paypal.me/JometFranklin"
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
             }
         )
     )
@@ -155,7 +155,7 @@ fun AboutScreen(
             subtitle = "jometfranklin143@gmail.com",
             onClick = {
                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:jometfranklin143@gmail.com")
+                    data = "mailto:jometfranklin143@gmail.com".toUri()
                     putExtra(Intent.EXTRA_SUBJECT, "UniCalculator Support")
                 }
                 context.startActivity(emailIntent)
@@ -183,7 +183,7 @@ fun AboutScreen(
             subtitle = "View open source on GitHub",
             onClick = {
                 val url = "https://github.com/Jomet-Franklin/UniCalculator"
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
             }
         ),
         RowItem(
@@ -202,10 +202,13 @@ fun AboutScreen(
                 showDialog = true
             }
         ),
+
+        // =========== Version ===========
+
         RowItem(
             icon = Icons.Outlined.Info,
             title = "Version",
-            subtitle = "1.0.0",
+            subtitle = "1.1.0",
             isClickable = false
         )
     )
@@ -288,7 +291,7 @@ fun AboutScreen(
                             ) { offset ->
                                 linkRanges.forEach { range ->
                                     if (offset in range.start..range.end) {
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(range.url))
+                                        val intent = Intent(Intent.ACTION_VIEW, range.url.toUri())
                                         context.startActivity(intent)
                                     }
                                 }

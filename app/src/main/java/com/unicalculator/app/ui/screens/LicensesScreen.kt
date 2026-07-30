@@ -20,7 +20,6 @@ package com.unicalculator.app.ui.screens
  */
 
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -31,11 +30,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
+import com.unicalculator.app.ui.theme.LocalCalculatorColors
 
 data class LicenseEntry(
     val name: String,
@@ -43,6 +43,7 @@ data class LicenseEntry(
     val licenseText: String,
     val url: String
 )
+
 object LicenseTexts {
     val APACHE_2_0 = """
         Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,54 +70,6 @@ object LicenseTexts {
         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
         GNU General Public License for more details.
     """.trimIndent()
-
-    val MIT = """
-        Permission is hereby granted, free of charge, to any person obtaining a copy
-        of this software and associated documentation files (the "Software"), to deal
-        in the Software without restriction, including without limitation the rights
-        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-        copies of the Software, and to permit persons to whom the Software is
-        furnished to do so, subject to the following conditions:
-
-        The above copyright notice and this permission notice shall be included in all
-        copies or substantial portions of the Software.
-
-        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-        SOFTWARE.
-    """.trimIndent()
-
-    val BSD_3_CLAUSE = """
-        Redistribution and use in source and binary forms, with or without
-        modification, are permitted provided that the following conditions are met:
-
-        1. Redistributions of source code must retain the above copyright notice,
-           this list of conditions and the following disclaimer.
-
-        2. Redistributions in binary form must reproduce the above copyright notice,
-           this list of conditions and the following disclaimer in the documentation
-           and/or other materials provided with the distribution.
-
-        3. Neither the name of the copyright holder nor the names of its contributors
-           may be used to endorse or promote products derived from this software
-           without specific prior written permission.
-
-        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-        AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-        ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-        LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-        CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-        SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-        INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-        CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-        ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-        POSSIBILITY OF SUCH DAMAGE.
-    """.trimIndent()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -124,8 +77,8 @@ object LicenseTexts {
 fun LicensesScreen(onBack: () -> Unit) {
     BackHandler { onBack() }
 
-    val context = LocalContext.current
-    val backgroundColor = Color(0xFF141920)
+    val colors = LocalCalculatorColors.current
+
     val licenses = listOf(
         LicenseEntry(
             name = "Qalculate Android",
@@ -144,6 +97,12 @@ fun LicensesScreen(onBack: () -> Unit) {
             copyright = "Copyright 2016-2024 JetBrains s.r.o.",
             licenseText = LicenseTexts.APACHE_2_0,
             url = "https://github.com/Kotlin/kotlinx.coroutines"
+        ),
+        LicenseEntry(
+            name = "Material Design Icons",
+            copyright = "Copyright Google",
+            licenseText = LicenseTexts.APACHE_2_0,
+            url = "https://github.com/google/material-design-icons"
         ),
         LicenseEntry(
             name = "AndroidX DataStore",
@@ -210,24 +169,24 @@ fun LicensesScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Licenses", color = Color.White) },
+                title = { Text("Licenses", color = colors.textPrimary) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color.White
+                            tint = colors.textPrimary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = backgroundColor,
-                    titleContentColor = Color.White
+                    containerColor = colors.background,
+                    titleContentColor = colors.textPrimary
                 ),
                 windowInsets = WindowInsets(0, 0, 0, 0)
             )
         },
-        containerColor = backgroundColor
+        containerColor = colors.background
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -237,20 +196,19 @@ fun LicensesScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(licenses) { entry ->
-                LicenseCard(entry)
+                LicenseCard(entry, colors)
             }
         }
     }
 }
 
 @Composable
-private fun LicenseCard(entry: LicenseEntry) {
+private fun LicenseCard(entry: LicenseEntry, colors: com.unicalculator.app.ui.theme.CalculatorColors) {
     val context = LocalContext.current
-    val cardColor = Color(0xFF1E242A)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
+        colors = CardDefaults.cardColors(containerColor = colors.numberButton),
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -261,25 +219,25 @@ private fun LicenseCard(entry: LicenseEntry) {
         ) {
             Text(
                 text = entry.name,
-                color = Color(0xFF4FC3F7),
+                color = colors.someLink,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .clickable {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(entry.url))
+                        val intent = Intent(Intent.ACTION_VIEW, entry.url.toUri())
                         context.startActivity(intent)
                     }
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = entry.copyright,
-                color = Color.White.copy(alpha = 0.8f),
+                color = colors.textSecondary,
                 fontSize = 14.sp
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = entry.licenseText,
-                color = Color.LightGray.copy(alpha = 0.7f),
+                color = colors.textSecondary.copy(alpha = 0.7f),
                 fontSize = 13.sp,
                 lineHeight = 18.sp
             )

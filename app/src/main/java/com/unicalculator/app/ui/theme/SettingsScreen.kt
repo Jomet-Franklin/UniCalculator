@@ -20,7 +20,7 @@ package com.unicalculator.app.ui.theme
  */
 
 import android.content.Context
-import android.content.SharedPreferences
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -80,7 +80,7 @@ fun SettingsScreen(
     }
 
     val colors = LocalCalculatorColors.current
-
+    BackHandler(onBack = onBack)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -108,7 +108,7 @@ fun SettingsScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // ---- Theme Section ----
+            // ==== Theme Section ====
             item {
                 SectionHeader(title = "Theme")
             }
@@ -283,9 +283,9 @@ private fun SegmentedControl(
                 modifier = Modifier
                     .weight(1f)
                     .clip(
-                        when {
-                            index == 0 -> RoundedCornerShape(topStart = 100.dp, bottomStart = 100.dp)
-                            index == options.size - 1 -> RoundedCornerShape(topEnd = 100.dp, bottomEnd = 100.dp)
+                        when (index) {
+                            0 -> RoundedCornerShape(topStart = 100.dp, bottomStart = 100.dp)
+                            options.size - 1 -> RoundedCornerShape(topEnd = 100.dp, bottomEnd = 100.dp)
                             else -> RoundedCornerShape(0.dp)
                         }
                     )

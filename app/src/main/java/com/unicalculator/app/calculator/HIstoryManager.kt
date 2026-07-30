@@ -40,7 +40,7 @@ object HistoryManager {
 
     fun init(context: Context) {
         prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        getHistory() // preload to catch any corruption
+        getHistory()
     }
 
     fun addEntry(expression: String, result: String, mode: String) {
@@ -53,8 +53,8 @@ object HistoryManager {
             }
             list.add(0, item)
             saveHistory(list)
-        } catch (_: Exception) {   // ✅ unused parameter renamed
-            // ignore
+        } catch (_: Exception) {
+
         }
     }
 
@@ -68,8 +68,7 @@ object HistoryManager {
                 val type = object : TypeToken<List<HistoryItem>>() {}.type
                 gson.fromJson(json, type) ?: emptyList()
             }
-        } catch (_: Exception) {   // ✅ unused parameter renamed
-            // If corrupted, clear it
+        } catch (_: Exception) {
             saveHistory(emptyList())
             emptyList()
         }
@@ -94,9 +93,8 @@ object HistoryManager {
         try {
             val prefs = prefs ?: return
             val json = gson.toJson(list)
-            prefs.edit { putString(KEY_HISTORY, json) }   // ✅ uses KTX extension
-        } catch (_: Exception) {   // ✅ unused parameter renamed
-            // ignore
+            prefs.edit { putString(KEY_HISTORY, json) }
+        } catch (_: Exception) {
         }
     }
 }
