@@ -23,10 +23,17 @@
 
 ## 📸 Screenshots
 
-|                     Standard                     | Scientific | Converter |
-|:------------------------------------------------:|:---:|:---:|
-| <img src="screenshots/standard.png" width="250"> | <img src="screenshots/scientific.png" width="250"> | <img src="screenshots/converter.png" width="250"> |
+### Dark Mode
 
+| Standard | Scientific | Converter |
+|:---:|:---:|:---:|
+| <img src="screenshots/standard_dark.png" width="250"> | <img src="screenshots/scientific_dark.png" width="250"> | <img src="screenshots/converter_dark.png" width="250"> |
+
+### Light Mode
+
+| Standard | Scientific |                        Converter                        |
+|:---:|:---:|:-------------------------------------------------------:|
+| <img src="screenshots/standard_light.png" width="250"> | <img src="screenshots/scientific_light.png" width="250"> | <img src="screenshots/converter_light.png" width="250"> |
 ---
 
 ## 📥 Download
