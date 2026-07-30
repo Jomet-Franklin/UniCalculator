@@ -1,4 +1,4 @@
-![Banner](screenshots/banner.png)
+![Banner](screenshots/mainbanner.png)
 
 # UniCalculator
 
