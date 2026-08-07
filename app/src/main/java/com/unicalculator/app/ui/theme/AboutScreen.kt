@@ -4,7 +4,7 @@ package com.unicalculator.app.ui.theme
 
 /*
  * UniCalculator – a versatile calculator for Android
- * Copyright (C) 2025 Jomet Franklin
+ * Copyright (C) 2026 Jomet Franklin
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -208,7 +208,7 @@ fun AboutScreen(
         RowItem(
             icon = Icons.Outlined.Info,
             title = "Version",
-            subtitle = "1.1.0",
+            subtitle = "1.2.0",
             isClickable = false
         )
     )

@@ -2,7 +2,7 @@ package com.unicalculator.app
 
 /*
  * UniCalculator – a versatile calculator for Android
- * Copyright (C) 2025 Jomet Franklin
+ * Copyright (C) 2026 Jomet Franklin
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -127,27 +127,172 @@ data class ConverterCategory(
 )
 
 val converterCategories = listOf(
-    ConverterCategory("length", "Length",R.drawable.ic_length, listOf("Nanometer", "Micrometer", "Millimeter", "Centimeter", "Decimeter", "Meter", "Kilometer", "Mile", "Yard", "Foot", "Inch", "Nautical Mile")),
-    ConverterCategory("area", "Area",R.drawable.ic_area, listOf("Square Millimeter", "Square Centimeter", "Square Decimeter", "Square Meter", "Square Kilometer", "Hectare", "Acre", "Square Yard", "Square Foot", "Square Inch")),
-    ConverterCategory("volume", "Volume",R.drawable.ic_volume, listOf("Cubic Millimeter", "Cubic Centimeter", "Cubic Decimeter", "Cubic Meter", "Liter", "Milliliter", "Kiloliter", "Gallon", "Quart", "Pint", "Cup", "Fluid Ounce", "Tablespoon", "Teaspoon")),
-    ConverterCategory("mass", "Mass",R.drawable.ic_mass, listOf("Milligram", "Gram", "Kilogram", "Tonne", "Pound", "Ounce", "Stone")),
-    ConverterCategory("temperature", "Temperature",R.drawable.ic_temperature, listOf("Celsius", "Fahrenheit", "Kelvin")),
-    ConverterCategory("storage", "Storage",R.drawable.ic_storage, listOf("Bit", "Byte", "Kilobit", "Kilobyte", "Kibibit", "Kibibyte", "Megabit", "Megabyte", "Mebibit", "Mebibyte", "Gigabit", "Gigabyte", "Gibibit", "Gibibyte", "Terabit", "Terabyte", "Tebibit", "Tebibyte", "Petabit", "Petabyte", "Pebibit", "Pebibyte")),
-    ConverterCategory("pressure", "Pressure",R.drawable.ic_pressure, listOf("Pascal", "Kilopascal", "Megapascal", "Bar", "Millibar", "Atmosphere", "PSI", "mmHg")),
-    ConverterCategory("heat", "Heat/Energy",R.drawable.ic_heat, listOf("Joule", "Kilojoule", "Megajoule", "Calorie", "Kilocalorie", "Watt-hour", "Kilowatt-hour")),
-    ConverterCategory("speed", "Speed",R.drawable.ic_speed, listOf("Meter per second", "Kilometer per hour", "Kilometer per second", "Mile per hour", "Knot", "Mach", "Speed of light")),
-    ConverterCategory("time", "Time",R.drawable.ic_time, listOf("Millisecond", "Second", "Minute", "Hour", "Day", "Week", "Month", "Year")),
-    ConverterCategory("angle", "Angle",R.drawable.ic_angle, listOf("Degree", "Arcminute", "Arcsecond", "Radian", "Gradian", "Turn")),
-    ConverterCategory("power", "Power",R.drawable.ic_power, listOf("Watt", "Kilowatt", "Megawatt", "Horsepower", "Metric horsepower", "Kilocalorie per second", "Newton-meter per second", "Kilogram-meter per second", "BTU per second", "Foot-pound per second")),
-    ConverterCategory("force", "Force",R.drawable.ic_force, listOf("Newton", "Kilonewton", "Dyne", "Pound-force", "Ounce-force")),
-    ConverterCategory("density", "Density",R.drawable.ic_density, listOf("Kilogram per cubic meter", "Gram per cubic centimeter", "Pound per cubic foot", "Pound per gallon")),
-    ConverterCategory("frequency", "Frequency",R.drawable.ic_frequency, listOf("Hertz", "Kilohertz", "Megahertz", "Gigahertz")),
-    ConverterCategory("torque", "Torque",R.drawable.ic_torque, listOf("Newton meter", "Kilonewton meter", "Pound-foot", "Ounce-inch")),
-    ConverterCategory("viscosity", "Viscosity",R.drawable.ic_viscosity, listOf("Pascal-second", "Centipoise", "Poise", "Poiseuille")),
-    ConverterCategory("fuel", "Fuel",R.drawable.ic_fuel, listOf("Liter", "Gallon (US)", "Gallon (UK)", "Barrel", "Cubic meter")),
-    ConverterCategory("date", "Date",R.drawable.ic_date, listOf("Days", "Weeks", "Months", "Years")),
-    ConverterCategory("bmi", "BMI",R.drawable.ic_bmi, listOf("kg/m²")),
-    ConverterCategory("shopping", "Shopping",R.drawable.ic_shopping, listOf("Percent", "Currency")),
+    // ---- 1. LENGTH ----
+    ConverterCategory("Length", "Length", R.drawable.ic_length, listOf(
+        "Nanometer", "Micrometer", "Millimeter", "Centimeter", "Decimeter",
+        "Meter", "Foot", "Yard", "Fathom", "Furlong",
+        "Kilometer", "Mile", "Nautical Mile", "Astronomical Unit", "Light-year", "Parsec", "Inch"
+    )),
+
+    // ---- 2. AREA ----
+    ConverterCategory("Area", "Area", R.drawable.ic_area, listOf(
+        "Square Millimeter", "Square Centimeter", "Square Decimeter", "Are",
+        "Square Meter", "Square Foot", "Square Yard", "Hectare", "Acre",
+        "Square Kilometer", "Square Mile", "Square Inch"
+    )),
+
+    // ---- 3. VOLUME ----
+    ConverterCategory("Volume", "Volume", R.drawable.ic_volume, listOf(
+        "Cubic Millimeter", "Cubic Centimeter", "Milliliter", "Cubic Inch",
+        "Cubic Decimeter", "Liter", "Teaspoon (US)", "Tablespoon (US)",
+        "Fluid Ounce (US)", "Fluid Ounce (UK)", "Cup (US)", "Pint (US)", "Pint (UK)",
+        "Quart (US)", "Quart (UK)", "Cubic Foot", "Gallon (US)", "Gallon (UK)",
+        "Cubic Yard", "Cubic Meter", "Kiloliter"
+    )),
+
+    // ---- 4. FUEL (volume) ----
+    ConverterCategory("Fuel", "Fuel", R.drawable.ic_fuel, listOf(
+        "Liter", "Gallon (US)", "Gallon (UK)", "Barrel (oil, US)", "Cubic meter"
+    )),
+
+    // ---- 5. MASS ----
+    ConverterCategory("Mass", "Mass", R.drawable.ic_mass, listOf(
+        "Milligram", "Gram", "Carat", "Grain", "Kilogram", "Slug",
+        "Pound", "Ounce", "Stone", "Tonne (metric)", "Short Ton (US)", "Long Ton (UK)"
+    )),
+
+    // ---- 6. TEMPERATURE ----
+    ConverterCategory("Temperature", "Temperature", R.drawable.ic_temperature, listOf(
+        "Celsius", "Fahrenheit", "Kelvin", "Rankine"
+    )),
+
+    // ---- 7. DIGITAL STORAGE ----
+    ConverterCategory("Digital Storage", "Digital Storage", R.drawable.ic_storage, listOf(
+        "Bit", "Byte", "Kilobit", "Kibibit", "Kilobyte", "Kibibyte",
+        "Megabit", "Mebibit", "Megabyte", "Mebibyte", "Gigabit", "Gibibit",
+        "Gigabyte", "Gibibyte", "Terabit", "Tebibit", "Terabyte", "Tebibyte",
+        "Petabit", "Pebibit", "Petabyte", "Pebibyte", "Exabit", "Exbibit",
+        "Exabyte", "Exbibyte"
+    )),
+
+    // ---- 8. DATA TRANSFER RATE ----
+    ConverterCategory("Data Transfer", "Data Rate", R.drawable.ic_data_transfer, listOf(
+        "bps", "Kbps", "Byte per second", "KB/s (decimal)", "Kibit/s", "KiB/s",
+        "Mbps", "MB/s (decimal)", "Mibit/s", "MiB/s", "Gbps", "GB/s (decimal)",
+        "Gibit/s", "GiB/s", "Tbps", "TB/s (decimal)"
+    )),
+
+    // ---- 9. PRESSURE ----
+    ConverterCategory("Pressure", "Pressure", R.drawable.ic_pressure, listOf(
+        "Pascal", "Millibar", "Kilopascal", "Kilogram-force per cm²",
+        "mmHg", "Torr", "inHg", "Bar", "Atmosphere", "PSI", "Megapascal"
+    )),
+
+    // ---- 10. ENERGY ----
+    ConverterCategory("Energy", "Energy", R.drawable.ic_energy, listOf(
+        "Electronvolt", "Erg", "Joule", "Foot-pound (energy)",
+        "Calorie (thermochemical)", "Kilojoule", "Kilocalorie",
+        "Watt-hour", "BTU", "Kilowatt-hour", "Megajoule"
+    )),
+
+    // ---- 11. SPEED ----
+    ConverterCategory("Speed", "Speed", R.drawable.ic_speed, listOf(
+        "Meter per second", "Foot per second", "Kilometer per hour",
+        "Knot", "Mile per hour", "Kilometer per second", "Speed of light"
+    )),
+
+    // ---- 12. TIME ----
+    ConverterCategory("Time", "Time", R.drawable.ic_time, listOf(
+        "Millisecond", "Second", "Minute", "Hour", "Day"
+    )),
+
+    // ---- 13. DATE / DURATION ----
+    ConverterCategory("Duration", "Duration", R.drawable.ic_date, listOf(
+        "Day", "Week", "Fortnight", "Month (average)", "Quarter (average)",
+        "Year (Julian)", "Decade", "Century"
+    )),
+
+    // ---- 14. ANGLE ----
+    ConverterCategory("Angle", "Angle", R.drawable.ic_angle, listOf(
+        "Arcsecond", "Arcminute", "Mil (NATO)", "Degree", "Gradian", "Radian", "Turn"
+    )),
+
+    // ---- 15. POWER ----
+    ConverterCategory("Power", "Power", R.drawable.ic_power, listOf(
+        "Milliwatt", "Watt", "Kilowatt", "Megawatt", "Gigawatt",
+        "Horsepower (mechanical)", "Horsepower (metric)",
+        "Foot-pound per second", "Kilogram-force meter per second",
+        "BTU per second", "Kilocalorie per second"
+    )),
+
+    // ---- 16. FORCE ----
+    ConverterCategory("Force", "Force", R.drawable.ic_force, listOf(
+        "Dyne", "Poundal", "Ounce-force", "Newton", "Pound-force",
+        "Kilogram-force", "Kilonewton"
+    )),
+
+    // ---- 17. DENSITY ----
+    ConverterCategory("Density", "Density", R.drawable.ic_density, listOf(
+        "Gram per liter", "Kilogram per cubic meter", "Gram per cubic centimeter",
+        "Pound per cubic foot", "Pound per gallon (US)", "Pound per cubic inch"
+    )),
+
+    // ---- 18. FREQUENCY ----
+    ConverterCategory("Frequency", "Frequency", R.drawable.ic_frequency, listOf(
+        "RPM (revolutions/min)", "Hertz", "Kilohertz", "Megahertz", "Gigahertz", "Terahertz"
+    )),
+
+    // ---- 19. TORQUE ----
+    ConverterCategory("Torque", "Torque", R.drawable.ic_torque, listOf(
+        "Ounce-inch", "Pound-inch", "Newton meter", "Pound-foot",
+        "Kilogram-force meter", "Kilonewton meter"
+    )),
+
+    // ---- 20. VISCOSITY ----
+    ConverterCategory("Viscosity", "Viscosity", R.drawable.ic_viscosity, listOf(
+        "Centipoise", "Poise", "Pascal-second", "Poiseuille", "Reyn"
+    )),
+
+    // ---- 21. FUEL ECONOMY (efficiency) ----
+    ConverterCategory("Fuel Economy", "Fuel Economy", R.drawable.ic_fuel_pump, listOf(
+        "L/100km", "km/L", "MPG (US)", "MPG (UK)"
+    )),
+
+    // ---- 22. RADIATION – Absorbed Dose ----
+    ConverterCategory("Absorbed Dose", "Absorbed Dose", R.drawable.ic_radiation, listOf(
+        "Milligray", "Centigray", "Rad", "Gray"
+    )),
+
+    // ---- 23. RADIATION – Equivalent Dose ----
+    ConverterCategory("Equivalent Dose", "Equivalent Dose", R.drawable.ic_radiation, listOf(
+        "Millisievert", "Rem", "Sievert"
+    )),
+
+    // ---- 24. ILLUMINANCE ----
+    ConverterCategory("Illuminance", "Illuminance", R.drawable.ic_illuminance, listOf(
+        "Lux", "Foot-candle"
+    )),
+
+    // ---- 25. SOUND LEVEL ----
+    ConverterCategory("Sound Level", "Sound Level", R.drawable.ic_sound, listOf(
+        "dB SPL", "Pascal"
+    )),
+
+    // ---- 26. TYPOGRAPHY ----
+    ConverterCategory("Typography", "Typography", R.drawable.ic_typography, listOf(
+        "Twip", "Point", "Pica", "Pixel (@96 DPI)", "Inch"
+    )),
+
+    // ---- 27. BLOOD GLUCOSE ----
+    ConverterCategory("Blood Glucose", "Blood Glucose", R.drawable.ic_blood_glucose, listOf(
+        "mg/dL", "mmol/L"
+    )),
+
+    // ---- BMI ----
+    ConverterCategory("bmi", "BMI", R.drawable.ic_bmi, listOf("kg/m²")),
+
+    // ---- Shopping ----
+    ConverterCategory("shopping", "Shopping", R.drawable.ic_shopping, listOf("Percent", "Currency"))
 )
 
 enum class KeyStyle { NUMBER, FUNCTION, ACCENT, SCIENTIFIC }
@@ -268,7 +413,7 @@ private fun scientificHandleKeyPress(
     val end = current.selection.end.coerceIn(0, text.length)
 
     return when {
-        label == "AC" -> TextFieldValue("0", TextRange(1))
+        label == "AC" -> TextFieldValue("", TextRange(0))
         label == "⌫" -> {
             if (start == 0 && end == 0) return current
             val newText = if (start != end) {
@@ -277,12 +422,12 @@ private fun scientificHandleKeyPress(
                 text.substring(0, start - 1) + text.substring(start)
             }
             val newCursor = if (start != end) start else (start - 1).coerceAtLeast(0)
-            TextFieldValue(newText.ifEmpty { "0" }, TextRange(newCursor))
+            TextFieldValue(newText, TextRange(newCursor))
         }
         justEvaluated && label.length == 1 && label[0].isDigit() -> {
             TextFieldValue(label, TextRange(label.length))
         }
-        text == "0" -> {
+        text.isEmpty() -> {
             val insert = scientificInsertMap[label] ?: label
             TextFieldValue(insert, TextRange(insert.length))
         }
@@ -365,8 +510,8 @@ fun UniCalculatorApp(
     var showConverterDetail by remember { mutableStateOf(false) }
     var selectedConverterCategory by remember { mutableStateOf("") }
 
-    var standardTextFieldValue by remember { mutableStateOf(TextFieldValue("0")) }
-    var scientificTextFieldValue by remember { mutableStateOf(TextFieldValue("0")) }
+    var standardTextFieldValue by remember { mutableStateOf(TextFieldValue("")) }
+    var scientificTextFieldValue by remember { mutableStateOf(TextFieldValue("")) }
 
     var dragOffset by remember { mutableFloatStateOf(0f) }
     val threshold = 150f
@@ -718,7 +863,7 @@ private fun standardHandleButtonPress(current: TextFieldValue, label: String, ju
     val end = current.selection.end.coerceIn(0, text.length)
 
     return when {
-        label == "AC" -> TextFieldValue("0", TextRange(1))
+        label == "AC" -> TextFieldValue("", TextRange(0))
         label == "=" -> {
             val result = StandardCalculatorEngine.evaluateExpression(text)
             TextFieldValue(result, TextRange(result.length))
@@ -731,19 +876,19 @@ private fun standardHandleButtonPress(current: TextFieldValue, label: String, ju
                 text.substring(0, start - 1) + text.substring(start)
             }
             val newCursor = if (start != end) start else (start - 1).coerceAtLeast(0)
-            TextFieldValue(newText.ifEmpty { "0" }, TextRange(newCursor))
+            TextFieldValue(newText, TextRange(newCursor))
         }
         justEvaluated && label.length == 1 && label[0].isDigit() -> {
             TextFieldValue(label, TextRange(label.length))
         }
         else -> {
             val transformed = StandardCalculatorEngine.handleKeyPress("", label)
-            val newText = if (text == "0") {
+            val newText = if (text.isEmpty()) {
                 transformed
             } else {
                 text.substring(0, start) + transformed + text.substring(end)
             }
-            val newCursor = if (text == "0") {
+            val newCursor = if (text.isEmpty()) {
                 transformed.length
             } else {
                 start + transformed.length
@@ -964,6 +1109,10 @@ fun EditableDisplay(
     val keyboardController = LocalSoftwareKeyboardController.current
     var hasFocus by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     LaunchedEffect(textFieldValue.text.length) {
         coroutineScope.launch {
             delay(50.milliseconds)
@@ -1051,20 +1200,15 @@ fun EditableDisplay(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-
             BasicTextField(
                 value = textFieldValue,
-                onValueChange = { newValue ->
-                    onTextFieldValueChange(newValue)
-                },
-                readOnly = false,
+                onValueChange = onTextFieldValueChange,
                 textStyle = TextStyle(
                     fontSize = expressionFontSize.sp,
                     color = colors.textPrimary,
                     fontWeight = FontWeight.Bold,
                     textAlign = if (isScientific) TextAlign.Start else TextAlign.End
                 ),
-                singleLine = false,
                 cursorBrush = SolidColor(colors.accentButton),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1845,8 +1989,8 @@ fun ConverterScreen(
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier.fillMaxSize().padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(converterCategories) { category ->
                 ConverterCard(
@@ -1881,21 +2025,15 @@ fun ConverterCard(category: ConverterCategory, onClick: () -> Unit) {
                 modifier = Modifier.size(36.dp),
                 tint = colors.converterIconTint
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = category.name,
                 color = colors.textPrimary,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 2,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "${category.units.size} units",
-                color = colors.textSecondary,
-                fontSize = 11.sp,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                lineHeight = 16.sp
             )
         }
     }
@@ -2308,6 +2446,11 @@ fun ScientificCalculatorScreen(
                             }
                         }
                     ) {
+                        val focusRequester = remember { FocusRequester() }
+                        LaunchedEffect(Unit) {
+                            focusRequester.requestFocus()
+                        }
+
                         BasicTextField(
                             value = textFieldValue,
                             onValueChange = onTextFieldValueChange,

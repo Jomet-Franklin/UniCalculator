@@ -2,7 +2,7 @@ package com.unicalculator.app.calculator
 
 /*
  * UniCalculator – a versatile calculator for Android
- * Copyright (C) 2025 Jomet Franklin
+ * Copyright (C) 2026 Jomet Franklin
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -48,6 +48,7 @@ object StandardCalculatorEngine {
             ""
         }
     }
+
     fun handleKeyPress(current: String, label: String): String {
         return when (label) {
             "AC" -> "0"
@@ -131,6 +132,7 @@ object StandardCalculatorEngine {
                     i += 2
                     continue
                 }
+                // Euler's number: standalone 'e' not part of a word
                 ch == 'e' && (i + 1 == expr.length || !expr[i + 1].isLetterOrDigit()) -> {
                     tokens.add(Token.Number(E))
                     i++
@@ -152,11 +154,9 @@ object StandardCalculatorEngine {
                         "ln", "log", "log10", "sqrt", "exp", "abs" -> {
                             Token.Function(name)
                         }
-                        else -> null
+                        else -> throw IllegalArgumentException("Unknown function or variable: '$name'")
                     }
-                    if (func != null) {
-                        tokens.add(func)
-                    }
+                    tokens.add(func)
                     continue
                 }
                 ch == '(' -> { tokens.add(Token.LParen); i++ }
@@ -166,7 +166,7 @@ object StandardCalculatorEngine {
                 ch == '^' -> { tokens.add(Token.Op('^')); i++ }
                 ch == '!' -> { tokens.add(Token.PostfixOp('!')); i++ }
                 ch == ' ' -> i++
-                else -> i++
+                else -> throw IllegalArgumentException("Unexpected character: '$ch'")
             }
         }
         return tokens
@@ -247,7 +247,7 @@ object StandardCalculatorEngine {
         }
 
         private fun parsePrimary(): Double {
-            if (pos >= tokens.size) return 0.0
+            if (pos >= tokens.size) throw IllegalArgumentException("Unexpected end of expression")
             return when (val token = tokens[pos]) {
                 is Token.Number -> { pos++; applyPostfix(token.value) }
                 is Token.LParen -> {
@@ -265,13 +265,10 @@ object StandardCalculatorEngine {
                         val result = evaluateFunction(token.name, arg)
                         applyPostfix(result)
                     } else {
-                        0.0
+                        throw IllegalArgumentException("Expected '(' after function '${token.name}'")
                     }
                 }
-                else -> {
-                    pos++
-                    0.0
-                }
+                else -> throw IllegalArgumentException("Unexpected token: $token")
             }
         }
 
@@ -306,7 +303,7 @@ object StandardCalculatorEngine {
                 "sqrt" -> sqrt(arg)
                 "exp" -> exp(arg)
                 "abs" -> abs(arg)
-                else -> 0.0
+                else -> throw IllegalArgumentException("Unsupported function: '$name'")
             }
         }
     }
@@ -322,7 +319,7 @@ object StandardCalculatorEngine {
     }
 
     private fun factorial(n: Int): Long {
-        if (n < 0) return 0
+        if (n < 0) throw IllegalArgumentException("Factorial of negative number")
         var result = 1L
         for (i in 2..n) result *= i
         return result

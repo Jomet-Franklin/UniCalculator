@@ -11,8 +11,8 @@ android {
         applicationId = "com.unicalculator.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -38,6 +38,7 @@ android {
     buildFeatures {
         compose = true
     }
+
     packaging {
         jniLibs.pickFirsts.addAll(
             listOf(
@@ -69,25 +70,19 @@ dependencies {
     implementation(libs.androidx.compose.material3)
 
     // Additional Compose dependencies
-    //noinspection UseTomlInstead
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
-    //noinspection UseTomlInstead
     implementation("androidx.compose.material3:material3-window-size-class:1.4.0")
 
     // JSON serialization
-    //noinspection UseTomlInstead
     implementation("com.google.code.gson:gson:2.14.0")
 
     // Coroutines
-    //noinspection UseTomlInstead
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
 
     // DataStore Preferences
-    //noinspection UseTomlInstead
     implementation("androidx.datastore:datastore-preferences:1.2.1")
 
-    // Qalculate! engine (latest stable)
-    //noinspection UseTomlInstead,Aligned16KB
+    // Qalculate! engine
     implementation("com.jherkenhoff:libqalculate:5.8.2-2")
 
     // Testing
