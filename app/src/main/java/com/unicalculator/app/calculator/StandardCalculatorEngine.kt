@@ -19,8 +19,10 @@ package com.unicalculator.app.calculator
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import kotlin.math.*
+import net.objecthunter.exp4j.ExpressionBuilder
+import net.objecthunter.exp4j.function.Function
 import java.util.Locale
+import kotlin.math.*
 
 object StandardCalculatorEngine {
 
@@ -39,7 +41,7 @@ object StandardCalculatorEngine {
             val sanitized = sanitize(expr)
             val result = evaluate(sanitized)
             val formatted = formatResult(result)
-            if (formatted == expr || !result.isFinite() || result.isNaN()) {
+            if (formatted == expr || !result.isFinite()) {
                 ""
             } else {
                 formatted
@@ -48,7 +50,6 @@ object StandardCalculatorEngine {
             ""
         }
     }
-
     fun handleKeyPress(current: String, label: String): String {
         return when (label) {
             "AC" -> "0"
@@ -95,217 +96,79 @@ object StandardCalculatorEngine {
             .replace("²", "^2")
             .replace("³", "^3")
             .replace("π", "pi")
-            .replace("∞", "inf")
+            .replace("∞", "Infinity")
             .replace("√", "sqrt")
-            .replace("sin⁻¹", "asin")
-            .replace("cos⁻¹", "acos")
-            .replace("tan⁻¹", "atan")
+            .replace(Regex("""(\d+)!"""), "factorial($1)")
+            .replace(Regex("""(\d+)%"""), "($1/100)")
 
-        sanitized = sanitized.replace(Regex("(\\d)([a-zA-Z])"), "$1*$2")
-        sanitized = sanitized.replace(Regex("(\\d)(\\()"), "$1*$(")
-        sanitized = sanitized.replace(Regex("""\)([a-zA-Z0-9(])"""), ")*$1")
+        sanitized = sanitized.replace(Regex("(\\d)([a-zA-Z(])"), "$1*$2")
+        sanitized = sanitized.replace(Regex("""\)([a-zA-Z(])"""), ")*$1")
+        sanitized = autoCloseParentheses(sanitized)
+
         return sanitized
+    }
+    private fun autoCloseParentheses(expr: String): String {
+        var open = 0
+        for (ch in expr) {
+            if (ch == '(') open++
+            else if (ch == ')') open--
+        }
+        return if (open > 0) expr + ")".repeat(open) else expr
     }
 
     private fun evaluate(expr: String): Double {
-        val tokens = tokenize(expr)
-        return Parser(tokens).parse()
-    }
 
-    private fun tokenize(expr: String): List<Token> {
-        val tokens = mutableListOf<Token>()
-        var i = 0
-        while (i < expr.length) {
-            val ch = expr[i]
-            when {
-                ch.isDigit() || ch == '.' -> {
-                    var num = ""
-                    while (i < expr.length && (expr[i].isDigit() || expr[i] == '.')) {
-                        num += expr[i]
-                        i++
-                    }
-                    tokens.add(Token.Number(num.toDouble()))
-                    continue
-                }
-                ch == 'p' && expr.startsWith("pi", i) -> {
-                    tokens.add(Token.Number(PI))
-                    i += 2
-                    continue
-                }
-                // Euler's number: standalone 'e' not part of a word
-                ch == 'e' && (i + 1 == expr.length || !expr[i + 1].isLetterOrDigit()) -> {
-                    tokens.add(Token.Number(E))
-                    i++
-                    continue
-                }
-                ch == 'i' && expr.startsWith("inf", i) -> {
-                    tokens.add(Token.Number(Double.POSITIVE_INFINITY))
-                    i += 3
-                    continue
-                }
-                ch.isLetter() -> {
-                    var name = ""
-                    while (i < expr.length && expr[i].isLetter()) {
-                        name += expr[i]
-                        i++
-                    }
-                    val func = when (name) {
-                        "sin", "cos", "tan", "asin", "acos", "atan",
-                        "ln", "log", "log10", "sqrt", "exp", "abs" -> {
-                            Token.Function(name)
-                        }
-                        else -> throw IllegalArgumentException("Unknown function or variable: '$name'")
-                    }
-                    tokens.add(func)
-                    continue
-                }
-                ch == '(' -> { tokens.add(Token.LParen); i++ }
-                ch == ')' -> { tokens.add(Token.RParen); i++ }
-                ch in "+-*/" -> { tokens.add(Token.Op(ch)); i++ }
-                ch == '%' -> { tokens.add(Token.PostfixOp('%')); i++ }
-                ch == '^' -> { tokens.add(Token.Op('^')); i++ }
-                ch == '!' -> { tokens.add(Token.PostfixOp('!')); i++ }
-                ch == ' ' -> i++
-                else -> throw IllegalArgumentException("Unexpected character: '$ch'")
+        val sinDeg = object : Function("sin", 1) {
+            override fun apply(args: DoubleArray): Double = sin(Math.toRadians(args[0]))
+        }
+        val cosDeg = object : Function("cos", 1) {
+            override fun apply(args: DoubleArray): Double = cos(Math.toRadians(args[0]))
+        }
+        val tanDeg = object : Function("tan", 1) {
+            override fun apply(args: DoubleArray): Double = tan(Math.toRadians(args[0]))
+        }
+        val asinDeg = object : Function("asin", 1) {
+            override fun apply(args: DoubleArray): Double = Math.toDegrees(asin(args[0]))
+        }
+        val acosDeg = object : Function("acos", 1) {
+            override fun apply(args: DoubleArray): Double = Math.toDegrees(acos(args[0]))
+        }
+        val atanDeg = object : Function("atan", 1) {
+            override fun apply(args: DoubleArray): Double = Math.toDegrees(atan(args[0]))
+        }
+        val factorial = object : Function("factorial", 1) {
+            override fun apply(args: DoubleArray): Double {
+                val n = args[0].toInt()
+                if (n < 0) throw IllegalArgumentException("Factorial of negative number")
+                var result = 1.0
+                for (i in 2..n) result *= i
+                return result
             }
         }
-        return tokens
-    }
-
-    private sealed class Token {
-        data class Number(val value: Double) : Token()
-        data class Op(val char: Char) : Token()
-        data class Function(val name: String) : Token()
-        object LParen : Token()
-        object RParen : Token()
-        data class PostfixOp(val char: Char) : Token()
-    }
-
-    private class Parser(private val tokens: List<Token>) {
-        private var pos = 0
-
-        fun parse(): Double = parseExpression()
-
-        private fun parseExpression(): Double = parseAddSub()
-
-        private fun parseAddSub(): Double {
-            var left = parseMulDiv()
-            while (pos < tokens.size) {
-                when (val token = tokens[pos]) {
-                    is Token.Op -> {
-                        when (token.char) {
-                            '+' -> { pos++; left += parseMulDiv() }
-                            '-' -> { pos++; left -= parseMulDiv() }
-                            else -> break
-                        }
-                    }
-                    else -> break
-                }
-            }
-            return left
+        val lnFunc = object : Function("ln", 1) {
+            override fun apply(args: DoubleArray): Double = ln(args[0])
+        }
+        val expFunc = object : Function("exp", 1) {
+            override fun apply(args: DoubleArray): Double = exp(args[0])
+        }
+        val log10Func = object : Function("log", 1) {
+            override fun apply(args: DoubleArray): Double = log10(args[0])
         }
 
-        private fun parseMulDiv(): Double {
-            var left = parseUnary()
-            while (pos < tokens.size) {
-                when (val token = tokens[pos]) {
-                    is Token.Op -> {
-                        when (token.char) {
-                            '*' -> { pos++; left *= parseUnary() }
-                            '/' -> { pos++; left /= parseUnary() }
-                            else -> break
-                        }
-                    }
-                    else -> break
-                }
-            }
-            return left
-        }
+        val expression = ExpressionBuilder(expr)
+            .function(sinDeg)
+            .function(cosDeg)
+            .function(tanDeg)
+            .function(asinDeg)
+            .function(acosDeg)
+            .function(atanDeg)
+            .function(factorial)
+            .function(lnFunc)
+            .function(expFunc)
+            .function(log10Func)
+            .build()
 
-        private fun parseUnary(): Double {
-            if (pos < tokens.size) {
-                val token = tokens[pos]
-                if (token is Token.Op && token.char == '-') {
-                    pos++
-                    return -parseUnary()
-                }
-            }
-            return parsePow()
-        }
-
-        private fun parsePow(): Double {
-            val left = parsePrimary()
-            if (pos < tokens.size) {
-                val token = tokens[pos]
-                if (token is Token.Op && token.char == '^') {
-                    pos++
-                    val right = parseUnary()
-                    return left.pow(right)
-                }
-            }
-            return left
-        }
-
-        private fun parsePrimary(): Double {
-            if (pos >= tokens.size) throw IllegalArgumentException("Unexpected end of expression")
-            return when (val token = tokens[pos]) {
-                is Token.Number -> { pos++; applyPostfix(token.value) }
-                is Token.LParen -> {
-                    pos++
-                    val result = parseExpression()
-                    if (pos < tokens.size && tokens[pos] is Token.RParen) pos++
-                    applyPostfix(result)
-                }
-                is Token.Function -> {
-                    pos++
-                    if (pos < tokens.size && tokens[pos] is Token.LParen) {
-                        pos++
-                        val arg = parseExpression()
-                        if (pos < tokens.size && tokens[pos] is Token.RParen) pos++
-                        val result = evaluateFunction(token.name, arg)
-                        applyPostfix(result)
-                    } else {
-                        throw IllegalArgumentException("Expected '(' after function '${token.name}'")
-                    }
-                }
-                else -> throw IllegalArgumentException("Unexpected token: $token")
-            }
-        }
-
-        private fun applyPostfix(value: Double): Double {
-            if (pos < tokens.size && tokens[pos] is Token.PostfixOp) {
-                val op = tokens[pos] as Token.PostfixOp
-                when (op.char) {
-                    '!' -> {
-                        pos++
-                        return factorial(value.toInt()).toDouble()
-                    }
-                    '%' -> {
-                        pos++
-                        return value / 100.0
-                    }
-                }
-            }
-            return value
-        }
-
-        private fun evaluateFunction(name: String, arg: Double): Double {
-            return when (name) {
-                "sin" -> sin(Math.toRadians(arg))
-                "cos" -> cos(Math.toRadians(arg))
-                "tan" -> tan(Math.toRadians(arg))
-                "asin" -> Math.toDegrees(asin(arg))
-                "acos" -> Math.toDegrees(acos(arg))
-                "atan" -> Math.toDegrees(atan(arg))
-                "ln" -> ln(arg)
-                "log" -> log10(arg)
-                "log10" -> log10(arg)
-                "sqrt" -> sqrt(arg)
-                "exp" -> exp(arg)
-                "abs" -> abs(arg)
-                else -> throw IllegalArgumentException("Unsupported function: '$name'")
-            }
-        }
+        return expression.evaluate()
     }
 
     private fun formatResult(value: Double): String {
@@ -313,15 +176,11 @@ object StandardCalculatorEngine {
             value.toLong().toString()
         } else {
             val str = value.toString()
-            if (str.length > 15) String.format(Locale.US, "%.10f", value).trimEnd('0').trimEnd('.')
-            else str
+            if (str.length > 15) {
+                String.format(Locale.US, "%.10f", value).trimEnd('0').trimEnd('.')
+            } else {
+                str
+            }
         }
-    }
-
-    private fun factorial(n: Int): Long {
-        if (n < 0) throw IllegalArgumentException("Factorial of negative number")
-        var result = 1L
-        for (i in 2..n) result *= i
-        return result
     }
 }

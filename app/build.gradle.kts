@@ -11,8 +11,8 @@ android {
         applicationId = "com.unicalculator.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 4
+        versionName = "1.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -23,6 +23,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -85,8 +86,12 @@ dependencies {
     // Qalculate! engine
     implementation("com.jherkenhoff:libqalculate:5.8.2-2")
 
+    // Standard Calculator Engine (exp4j)
+    implementation("net.objecthunter:exp4j:0.4.8")
+
     // Testing
     testImplementation(libs.junit)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

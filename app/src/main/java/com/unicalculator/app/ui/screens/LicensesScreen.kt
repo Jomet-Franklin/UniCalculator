@@ -93,6 +93,12 @@ fun LicensesScreen(onBack: () -> Unit) {
             url = "https://github.com/google/gson"
         ),
         LicenseEntry(
+            name = "exp4j",
+            copyright = "Copyright 2013 objekt-ware",
+            licenseText = LicenseTexts.APACHE_2_0,
+            url = "https://github.com/objekt-ware/exp4j"
+        ),
+        LicenseEntry(
             name = "Kotlin Coroutines",
             copyright = "Copyright 2016-2024 JetBrains s.r.o.",
             licenseText = LicenseTexts.APACHE_2_0,

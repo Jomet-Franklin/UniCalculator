@@ -256,7 +256,7 @@ object UnitConverter {
             "Fortnight" to 14.0,
             "Month (average)" to 30.436875,
             "Quarter (average)" to 91.310625,
-            "Year (Julian)" to 365.25,
+            "Year (average)" to 365.25,
             "Decade" to 3652.5,
             "Century" to 36525.0
         )

@@ -273,7 +273,7 @@ fun ConverterDetailScreen(
             "Fortnight" to "fn",
             "Month (average)" to "mo",
             "Quarter (average)" to "qtr",
-            "Year (Julian)" to "yr",
+            "Year (average)" to "yr",
             "Decade" to "dec",
             "Century" to "cent",
             "Arcsecond" to "″",

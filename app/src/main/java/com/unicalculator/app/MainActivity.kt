@@ -80,7 +80,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.isActive
 import com.unicalculator.app.calculator.StandardCalculatorEngine
 import com.unicalculator.app.calculator.QalculateEngine
 import com.unicalculator.app.calculator.HistoryItem
@@ -357,7 +356,7 @@ private val scientificInsertMap = mapOf(
     "xʸ" to "^",
     "!" to "!",
     "%" to "%",
-    "∫" to "integral(",
+    "∫" to "integrate(",
     "dx" to "diff(",
     "Σ" to "sum(",
     "Π" to "product(",
@@ -376,7 +375,7 @@ private val scientificInsertMap = mapOf(
     "5" to "5", "6" to "6", "7" to "7", "8" to "8", "9" to "9",
     "." to ".",
     "+" to "+", "-" to "-", "·" to "·", "/" to "/",
-    "X" to "X", "Y" to "Y", "Z" to "Z",
+    "x" to "x", "y" to "y", "z" to "z",
     "giga" to "G",
     "mega" to "M",
     "kilo" to "k",
@@ -402,7 +401,6 @@ private val scientificInsertMap = mapOf(
     "Imag." to "im(",
     "Conj." to "conj("
 )
-
 private fun scientificHandleKeyPress(
     current: TextFieldValue,
     label: String,
@@ -424,13 +422,16 @@ private fun scientificHandleKeyPress(
             val newCursor = if (start != end) start else (start - 1).coerceAtLeast(0)
             TextFieldValue(newText, TextRange(newCursor))
         }
+
         justEvaluated && label.length == 1 && label[0].isDigit() -> {
             TextFieldValue(label, TextRange(label.length))
         }
+
         text.isEmpty() -> {
             val insert = scientificInsertMap[label] ?: label
             TextFieldValue(insert, TextRange(insert.length))
         }
+
         else -> {
             val insert = scientificInsertMap[label] ?: label
             val newText = text.substring(0, start) + insert + text.substring(end)
@@ -447,7 +448,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         HistoryManager.init(this)
 
-        // Load saved theme from SharedPreferences
         val prefs = getSharedPreferences("settings_prefs", MODE_PRIVATE)
         val savedTheme = prefs.getString("selected_theme", "System") ?: "System"
         val savedPureBlack = prefs.getBoolean("pure_black_enabled", false)
@@ -805,8 +805,7 @@ fun StandardCalculatorScreen(
                     onTextFieldValueChange(TextFieldValue(newText, TextRange(newCursor)))
                 },
                 modifier = Modifier.weight(0.7f),
-                isScientific = false,
-                keyboardEnabled = keyboardEnabled
+                isScientific = false
             )
             Box(
                 modifier = Modifier
@@ -1089,6 +1088,7 @@ fun StandardKeypadWithScientific(
 }
 
 // ========== EDITABLE DISPLAY ==========
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditableDisplay(
     textFieldValue: TextFieldValue,
@@ -1096,8 +1096,7 @@ fun EditableDisplay(
     onTextFieldValueChange: (TextFieldValue) -> Unit,
     onPaste: (String) -> Unit,
     modifier: Modifier = Modifier,
-    isScientific: Boolean = false,
-    keyboardEnabled: Boolean = false
+    isScientific: Boolean = false
 ) {
     val colors = LocalCalculatorColors.current
     val context = LocalContext.current
@@ -1106,9 +1105,9 @@ fun EditableDisplay(
 
     val scrollState = rememberScrollState()
     val focusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
     var hasFocus by remember { mutableStateOf(false) }
 
+    // Auto-focus when screen loads
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
@@ -1117,15 +1116,6 @@ fun EditableDisplay(
         coroutineScope.launch {
             delay(50.milliseconds)
             scrollState.animateScrollTo(scrollState.maxValue)
-        }
-    }
-
-    LaunchedEffect(hasFocus, keyboardEnabled) {
-        if (hasFocus && !keyboardEnabled) {
-            while (isActive) {
-                keyboardController?.hide()
-                delay(50.milliseconds)
-            }
         }
     }
 
@@ -1200,78 +1190,86 @@ fun EditableDisplay(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            BasicTextField(
-                value = textFieldValue,
-                onValueChange = onTextFieldValueChange,
-                textStyle = TextStyle(
-                    fontSize = expressionFontSize.sp,
-                    color = colors.textPrimary,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = if (isScientific) TextAlign.Start else TextAlign.End
-                ),
-                cursorBrush = SolidColor(colors.accentButton),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 40.dp, max = maxHeight)
-                    .verticalScroll(scrollState)
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { focusState ->
-                        hasFocus = focusState.isFocused
-                        if (focusState.isFocused && !keyboardEnabled) {
-                            keyboardController?.hide()
+
+            // ✅ Block system keyboard with InterceptPlatformTextInput
+            InterceptPlatformTextInput(
+                interceptor = { _, _ ->
+                    // Never show the system keyboard – await indefinitely
+                    awaitCancellation()
+                }
+            ) {
+                BasicTextField(
+                    value = textFieldValue,
+                    onValueChange = { newValue ->
+                        onTextFieldValueChange(newValue)
+                    },
+                    textStyle = TextStyle(
+                        fontSize = expressionFontSize.sp,
+                        color = colors.textPrimary,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = if (isScientific) TextAlign.Start else TextAlign.End
+                    ),
+                    cursorBrush = SolidColor(colors.accentButton),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 40.dp, max = maxHeight)
+                        .verticalScroll(scrollState)
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focusState ->
+                            hasFocus = focusState.isFocused
                         }
-                    }
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onLongPress = {
-                                val items = mutableListOf<Pair<String, () -> Unit>>()
-                                items.add("Copy Expression" to {
-                                    clipboardManager.setPrimaryClip(
-                                        ClipData.newPlainText(
-                                            "expression",
-                                            textFieldValue.text
-                                        )
-                                    )
-                                    Toast
-                                        .makeText(context, "Expression copied", Toast.LENGTH_SHORT)
-                                        .show()
-                                })
-                                if (preview.isNotEmpty()) {
-                                    items.add("Copy Result" to {
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onLongPress = {
+                                    val items = mutableListOf<Pair<String, () -> Unit>>()
+                                    items.add("Copy Expression" to {
                                         clipboardManager.setPrimaryClip(
-                                            ClipData.newPlainText("result", preview)
+                                            ClipData.newPlainText(
+                                                "expression",
+                                                textFieldValue.text
+                                            )
                                         )
                                         Toast
-                                            .makeText(context, "Result copied", Toast.LENGTH_SHORT)
+                                            .makeText(context, "Expression copied", Toast.LENGTH_SHORT)
                                             .show()
                                     })
-                                }
-                                val clip = clipboardManager.primaryClip
-                                if (clip != null && clip.itemCount > 0) {
-                                    clip.getItemAt(0).text?.toString()?.let { text ->
-                                        if (text.isNotBlank()) {
-                                            items.add("Paste" to {
-                                                val formatted =
-                                                    smartFormatPastedText(text)
-                                                onPaste(formatted)
-                                            })
+                                    if (preview.isNotEmpty()) {
+                                        items.add("Copy Result" to {
+                                            clipboardManager.setPrimaryClip(
+                                                ClipData.newPlainText("result", preview)
+                                            )
+                                            Toast
+                                                .makeText(context, "Result copied", Toast.LENGTH_SHORT)
+                                                .show()
+                                        })
+                                    }
+                                    val clip = clipboardManager.primaryClip
+                                    if (clip != null && clip.itemCount > 0) {
+                                        clip.getItemAt(0).text?.toString()?.let { text ->
+                                            if (text.isNotBlank()) {
+                                                items.add("Paste" to {
+                                                    val formatted =
+                                                        smartFormatPastedText(text)
+                                                    onPaste(formatted)
+                                                })
+                                            }
                                         }
                                     }
+                                    if (items.isNotEmpty()) {
+                                        AlertDialog.Builder(context)
+                                            .setTitle("Options")
+                                            .setItems(
+                                                items.map { it.first }.toTypedArray()
+                                            ) { _, which ->
+                                                items[which].second.invoke()
+                                            }
+                                            .show()
+                                    }
                                 }
-                                if (items.isNotEmpty()) {
-                                    AlertDialog.Builder(context)
-                                        .setTitle("Options")
-                                        .setItems(
-                                            items.map { it.first }.toTypedArray()
-                                        ) { _, which ->
-                                            items[which].second.invoke()
-                                        }
-                                        .show()
-                                }
-                            }
-                        )
-                    }
-            )
+                            )
+                        }
+                )
+            }
         }
     }
 }
@@ -2552,9 +2550,9 @@ fun ScientificKeypadFull(
 
     val rows = listOf(
         listOf(
-            KeyDef("X", KeyStyle.SCIENTIFIC, secondaryLabel = "→x"),
-            KeyDef("Y", KeyStyle.SCIENTIFIC, secondaryLabel = "→y"),
-            KeyDef("Z", KeyStyle.SCIENTIFIC, secondaryLabel = "→z"),
+            KeyDef("x", KeyStyle.SCIENTIFIC, secondaryLabel = "→x"),
+            KeyDef("y", KeyStyle.SCIENTIFIC, secondaryLabel = "→y"),
+            KeyDef("z", KeyStyle.SCIENTIFIC, secondaryLabel = "→z"),
             KeyDef(selectedPrefix, KeyStyle.SCIENTIFIC, isDropdown = true, dropdownItems = listOf("giga", "mega", "kilo", "milli", "micro", "nano", "pico")),
             KeyDef(selectedUnit, KeyStyle.SCIENTIFIC, isDropdown = true, dropdownItems = listOf("ampere", "gram", "joule", "kelvin", "liter", "meter", "newton", "ohm", "pascal", "second", "volt", "watt"))
         ),
@@ -2600,7 +2598,7 @@ fun ScientificKeypadFull(
             KeyDef("-", KeyStyle.FUNCTION)
         ),
         listOf(
-            KeyDef("_", KeyStyle.FUNCTION, secondaryLabel = ";"),
+            KeyDef(";", KeyStyle.FUNCTION, secondaryLabel = "_"),
             KeyDef("=", KeyStyle.FUNCTION, secondaryLabel = ","),
             KeyDef("0", KeyStyle.NUMBER),
             KeyDef(".", KeyStyle.NUMBER),

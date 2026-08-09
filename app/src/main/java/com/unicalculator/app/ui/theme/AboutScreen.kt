@@ -83,20 +83,21 @@ fun AboutScreen(
     """.trimIndent()
 
     val creditsPlainText = """
-        This app is built with the help of many amazing open‑source projects:
+    This app is built with the help of many amazing open‑source projects:
 
-        • Qalculate! – The powerful calculation engine
-        https://qalculate.github.io/
+    • Qalculate! – The powerful calculation engine
+    https://qalculate.github.io/
 
-        • qalculate-android – Android port
-        https://github.com/jherkenhoff/qalculate-android
+    • qalculate-android – Android port
+    https://github.com/jherkenhoff/qalculate-android
 
-        • Gson – JSON serialization (Apache 2.0)
-        • Kotlin Coroutines – Asynchronous programming (Apache 2.0)
-        • Android Jetpack Compose – Modern UI toolkit (Apache 2.0)
+    • Gson – JSON serialization (Apache 2.0)
+    • exp4j – Math expression evaluator (Apache 2.0)
+    • Kotlin Coroutines – Asynchronous programming (Apache 2.0)
+    • Android Jetpack Compose – Modern UI toolkit (Apache 2.0)
 
-        Special thanks to all contributors and testers who made this app better.
-    """.trimIndent()
+    Special thanks to all contributors and testers who made this app better.
+""".trimIndent()
 
     val linkRanges = remember {
         val ranges = mutableListOf<LinkRange>()
@@ -208,7 +209,7 @@ fun AboutScreen(
         RowItem(
             icon = Icons.Outlined.Info,
             title = "Version",
-            subtitle = "1.2.0",
+            subtitle = "1.3.0",
             isClickable = false
         )
     )
