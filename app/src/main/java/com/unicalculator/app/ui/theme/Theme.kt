@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+
 data class CalculatorColors(
     val background: Color,
     val displayBackground: Color,
@@ -41,64 +42,76 @@ data class CalculatorColors(
     val toolbarActive: Color,
     val converterIconTint: Color,
     val textTertiary: Color,
-    val someLink: Color
+    val someLink: Color,
+    val dangerText: Color,
+    val menuSurface: Color,
+    val menuBorder: Color,
+    val onAccent: Color
 )
 
-// ========== DARK MODE COLORS ==========
 private val DarkCalculatorColors = CalculatorColors(
-    background = Color(0xFF09111A),        // background color
-    displayBackground = Color(0xFF0E171F), // Display color
-    displayDivider = Color(0xFF2A3E42),    // Divider color
-    numberButton = Color(0xFF253036),      // Number row button color
-    functionButton = Color(0xFF375E69),    // tan, cos, * etc...
-    converterButton = Color(0xFF1B2529),   // Converter button color (something like dark blue)
-    converterIconTint = Color(0xFF00FFFF), // Converter icon color (cyan)
-    accentButton = Color(0xFF00C2D1),      // =, Enter, etc...
-    textPrimary = Color(0xFFFFFFFF),       // Number text color
-    textSecondary = Color(0xFFFFFFFF),     // every text color
-    textTertiary = Color(0xFFADADAD),      // Sub heading color
-    accentText = Color(0xFF00D9FF),        // Output color
-    toolbarActive = Color(0xFF00FFFF),     // Top, active icon color (cyan)
-    someLink = Color(0xFF00D9FF)           // Some link color
+    background = Color(0xFF0A0F16),
+    displayBackground = Color(0xFF111923),
+    displayDivider = Color(0xFF243140),
+    numberButton = Color(0xFF1B2531),
+    functionButton = Color(0xFF284554),
+    converterButton = Color(0xFF16202A),
+    converterIconTint = Color(0xFF4DD8E6),
+    accentButton = Color(0xFF00A3B5),
+    textPrimary = Color(0xFFF2F6F8),
+    textSecondary = Color(0xFFF2F6F8),
+    textTertiary = Color(0xFF9AA8B2),
+    accentText = Color(0xFF4DD8E6),
+    toolbarActive = Color(0xFF4DD8E6),
+    someLink = Color(0xFF5CC8FF),
+    dangerText = Color(0xFFFF9C94),
+    menuSurface = Color(0xFF223241),
+    menuBorder = Color(0xFF2E6E7A),
+    onAccent = Color(0xFF06141A)
 )
 
-// ========== PURE BLACK (AMOLED) MODE COLORS ==========
 private val PureBlackCalculatorColors = CalculatorColors(
-    background = Color(0xFF000000),        // background color (True black)
-    displayBackground = Color(0xFF0A0A0A), // Display color (Near-black panel)
-    displayDivider = Color(0xFF1A1A1A),    // divider
-    numberButton = Color(0xFF141414),      // Number row button color
-    functionButton = Color(0xFF2A2E30),    // tan, cos, * etc...
-    converterButton = Color(0xFF1A1A1A),   // Converter button color
-    converterIconTint = Color(0xFF00FFFF), // Converter icon color (cyan)
-    accentButton = Color(0xFF00C2D1),      // =, Enter, etc...
-    textPrimary = Color(0xFFFFFFFF),       // Number text color
-    textSecondary = Color(0xFFFFFFFF),     // every text color
-    textTertiary = Color(0xFF6E6E6E),      // Sub heading color
-    accentText = Color(0xFF00D9FF),        // Output color
-    toolbarActive = Color(0xFF00FFFF),     // Same top, active icon color (cyan)
-    someLink = Color(0xFF00D9FF)           // Some link color
+    background = Color(0xFF000000),
+    displayBackground = Color(0xFF0A0A0A),
+    displayDivider = Color(0xFF1A1A1A),
+    numberButton = Color(0xFF141414),
+    functionButton = Color(0xFF2A2E30),
+    converterButton = Color(0xFF1A1A1A),
+    converterIconTint = Color(0xFF4DD8E6),
+    accentButton = Color(0xFF00A3B5),
+    textPrimary = Color(0xFFFFFFFF),
+    textSecondary = Color(0xFFFFFFFF),
+    textTertiary = Color(0xFF8A8A8A),
+    accentText = Color(0xFF4DD8E6),
+    toolbarActive = Color(0xFF4DD8E6),
+    someLink = Color(0xFF5CC8FF),
+    dangerText = Color(0xFFFF9C94),
+    menuSurface = Color(0xFF161B1E),
+    menuBorder = Color(0xFF2E6E7A),
+    onAccent = Color(0xFF06141A)
 )
 
-// ========== LIGHT MODE COLORS ==========
 private val LightCalculatorColors = CalculatorColors(
-    background = Color(0xFFFFFFFF),        // background color
-    displayBackground = Color(0xFFF2FEFF), // Display color
-    displayDivider = Color(0xFFD0DCDA),    // divider
-    numberButton = Color(0xFFDDFFFF),      // Number row button color
-    functionButton = Color(0xFFB4FFFF),    // tan, cos, * etc...
-    converterButton = Color(0xFFE6FCFC),   // onverter button color
-    converterIconTint = Color(0xFF3DD1CE), // Converter icon color
-    accentButton = Color(0xFF6EFFFF),      // =, Enter, etc...
-    textPrimary = Color(0xFF000000),       // Number text color
-    textSecondary = Color(0xFF333333),     // every text color
-    textTertiary = Color(0xFF333333),      // Sub heading color
-    accentText = Color(0xFF00D9FF),        // Output color
-    toolbarActive = Color(0xFF2CE1E6),     // ive icon color (cyan)
-    someLink = Color(0xFF1543D6)           // Some link color
+    background = Color(0xFFFFFFFF),
+    displayBackground = Color(0xFFF2FEFF),
+    displayDivider = Color(0xFFD0DCDA),
+    numberButton = Color(0xFFDDFFFF),
+    functionButton = Color(0xFFB4FFFF),
+    converterButton = Color(0xFFE6FCFC),
+    converterIconTint = Color(0xFF3DD1CE),
+    accentButton = Color(0xFF6EFFFF),
+    textPrimary = Color(0xFF000000),
+    textSecondary = Color(0xFF333333),
+    textTertiary = Color(0xFF5A6B6B),
+    accentText = Color(0xFF00A3B5),
+    toolbarActive = Color(0xFF2CE1E6),
+    someLink = Color(0xFF1543D6),
+    dangerText = Color(0xFFC62828),
+    menuSurface = Color(0xFFE6F4F6),
+    menuBorder = Color(0xFFB0D8DA),
+    onAccent = Color(0xFF06141A)
 )
 
-// CompositionLocal to provide calculator colors
 val LocalCalculatorColors = staticCompositionLocalOf { DarkCalculatorColors }
 
 @Composable
@@ -120,7 +133,8 @@ fun UniCalculatorTheme(
             background = calculatorColors.background,
             surface = calculatorColors.displayBackground,
             onBackground = calculatorColors.textPrimary,
-            onSurface = calculatorColors.textPrimary
+            onSurface = calculatorColors.textPrimary,
+            error = calculatorColors.dangerText
         )
     } else {
         lightColorScheme(
@@ -129,16 +143,12 @@ fun UniCalculatorTheme(
             background = calculatorColors.background,
             surface = calculatorColors.displayBackground,
             onBackground = calculatorColors.textPrimary,
-            onSurface = calculatorColors.textPrimary
+            onSurface = calculatorColors.textPrimary,
+            error = calculatorColors.dangerText
         )
     }
 
-    CompositionLocalProvider(
-        LocalCalculatorColors provides calculatorColors
-    ) {
-        MaterialTheme(
-            colorScheme = colorScheme,
-            content = content
-        )
+    CompositionLocalProvider(LocalCalculatorColors provides calculatorColors) {
+        MaterialTheme(colorScheme = colorScheme, content = content)
     }
 }

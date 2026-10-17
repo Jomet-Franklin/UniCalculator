@@ -23,18 +23,21 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 
 data class HistoryItem(
     val expression: String,
     val result: String,
     val timestamp: Long,
-    val mode: String
+    val mode: String,
+    val pinned: Boolean = false
 )
 
 object HistoryManager {
     private const val PREF_NAME = "history_prefs"
     private const val KEY_HISTORY = "history_list"
+    private const val KEY_KEEP_PINNED = "history_keep_pinned"
     private val gson = Gson()
     private var prefs: SharedPreferences? = null
 
@@ -46,55 +49,87 @@ object HistoryManager {
     fun addEntry(expression: String, result: String, mode: String) {
         try {
             val list = getHistory().toMutableList()
-            val item = HistoryItem(expression, result, System.currentTimeMillis(), mode)
             val last = list.firstOrNull()
-            if (last != null && last.expression == expression && last.result == result && last.mode == mode) {
-                list.removeAt(0)
-            }
-            list.add(0, item)
+            val isDuplicate = last != null &&
+                    last.expression == expression &&
+                    last.result == result &&
+                    last.mode == mode
+            val wasPinned = isDuplicate && last?.pinned == true
+            if (isDuplicate) list.removeAt(0)
+            list.add(0, HistoryItem(expression, result, System.currentTimeMillis(), mode, wasPinned))
             saveHistory(list)
-        } catch (_: Exception) {
-
-        }
+        } catch (_: Exception) {}
     }
 
     fun getHistory(): List<HistoryItem> {
+        val p = prefs ?: return emptyList()
+        val json = p.getString(KEY_HISTORY, null)
+        if (json.isNullOrEmpty()) return emptyList()
         return try {
-            val prefs = prefs ?: return emptyList()
-            val json = prefs.getString(KEY_HISTORY, null)
-            if (json.isNullOrEmpty()) {
-                emptyList()
-            } else {
-                val type = object : TypeToken<List<HistoryItem>>() {}.type
-                gson.fromJson(json, type) ?: emptyList()
-            }
-        } catch (_: Exception) {
-            saveHistory(emptyList())
-            emptyList()
-        }
+            val type = object : TypeToken<List<JsonObject>>() {}.type
+            val raw: List<JsonObject>? = gson.fromJson(json, type)
+            raw?.mapNotNull { obj ->
+                try {
+                    val expression = obj.get("expression")?.asString ?: return@mapNotNull null
+                    val result = obj.get("result")?.asString ?: return@mapNotNull null
+                    val timestamp = obj.get("timestamp")?.asLong ?: return@mapNotNull null
+                    val mode = obj.get("mode")?.asString ?: return@mapNotNull null
+                    val pinned = try { obj.get("pinned")?.asBoolean ?: false } catch (_: Exception) { false }
+                    HistoryItem(expression, result, timestamp, mode, pinned)
+                } catch (_: Exception) { null }
+            } ?: emptyList()
+        } catch (_: Exception) { emptyList() }
     }
 
-    fun deleteItem(timestamp: Long) {
-        val list = getHistory().toMutableList()
-        list.removeAll { it.timestamp == timestamp }
-        saveHistory(list)
+    fun deleteItems(timestamps: List<Long>): List<HistoryItem> {
+        val all = getHistory()
+        val ids = timestamps.toSet()
+        val removed = all.filter { it.timestamp in ids }
+        saveHistory(all.filterNot { it.timestamp in ids })
+        return removed
     }
 
-    fun clearHistory(mode: String? = null) {
-        if (mode == null) {
-            saveHistory(emptyList())
-        } else {
-            val list = getHistory().filter { it.mode != mode }
-            saveHistory(list)
-        }
+    fun restoreItems(items: List<HistoryItem>) {
+        if (items.isEmpty()) return
+        val current = getHistory()
+        saveHistory((current + items).distinctBy { it.timestamp }.sortedByDescending { it.timestamp })
     }
+
+    fun togglePin(timestamps: List<Long>) {
+        val ids = timestamps.toSet()
+        saveHistory(getHistory().map { if (it.timestamp in ids) it.copy(pinned = !it.pinned) else it })
+    }
+
+    fun setPinned(timestamps: List<Long>, pinned: Boolean) {
+        val ids = timestamps.toSet()
+        saveHistory(getHistory().map { if (it.timestamp in ids) it.copy(pinned = pinned) else it })
+    }
+
+    fun count(mode: String?): Int {
+        val list = getHistory()
+        return if (mode == null) list.size else list.count { it.mode == mode }
+    }
+
+    fun clearHistory(mode: String? = null, keepPinned: Boolean = false): List<HistoryItem> {
+        val all = getHistory()
+        val toRemove = when {
+            mode == null && !keepPinned -> all
+            mode == null -> all.filter { !it.pinned }
+            !keepPinned -> all.filter { it.mode == mode }
+            else -> all.filter { it.mode == mode && !it.pinned }
+        }
+        val removeIds = toRemove.map { it.timestamp }.toSet()
+        saveHistory(all.filterNot { it.timestamp in removeIds })
+        return toRemove
+    }
+
+    fun getKeepPinned(): Boolean = prefs?.getBoolean(KEY_KEEP_PINNED, true) ?: true
+    fun setKeepPinned(value: Boolean) { prefs?.edit { putBoolean(KEY_KEEP_PINNED, value) } }
 
     private fun saveHistory(list: List<HistoryItem>) {
         try {
-            val prefs = prefs ?: return
-            val json = gson.toJson(list)
-            prefs.edit { putString(KEY_HISTORY, json) }
-        } catch (_: Exception) {
-        }
+            val p = prefs ?: return
+            p.edit { putString(KEY_HISTORY, gson.toJson(list)) }
+        } catch (_: Exception) {}
     }
 }

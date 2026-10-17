@@ -209,7 +209,7 @@ fun AboutScreen(
         RowItem(
             icon = Icons.Outlined.Info,
             title = "Version",
-            subtitle = "1.3.0",
+            subtitle = "1.4.0",
             isClickable = false
         )
     )
